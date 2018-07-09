@@ -1,4 +1,6 @@
+from datetime import datetime
 import os
+import time
 from urllib.parse import urljoin
 
 import requests
@@ -15,27 +17,55 @@ class PermissionClient():
     def __init__(self):
         """Constructor"""
         # get permission service URL from ENV (default: local service)
-        self.service_url = os.environ.get('CONFIG_SERVICE_URL',
-                                          'http://localhost:5010/')
+        self.service_url = os.environ.get(
+            'CONFIG_SERVICE_URL', 'http://localhost:5010/')
+        # check if cache is valid every x seconds (default: 60s)
+        self.config_check_interval = os.environ.get(
+            'CONFIG_CHECK_INTERVAL', 60)
+        # time in seconds until cache expiry (default: 24h)
+        self.default_cache_duration = os.environ.get(
+            'DEFAULT_CONFIG_CACHE_DURATION', 86400)
+
         self.headers = {
             'accept': 'application/json'
         }
+
         self.cache = Cache()
+        self.last_update_check = None
+        self.last_cache_flush = None
 
     def service_permissions(self, service, params, username,
-                            cache_duration=300):
+                            cache_duration=86400):
         """Return service permissions if available and permitted.
 
         :param str service: Service type
         :param obj params: Service specific request parameters
         :param str username: User name
-        :param int cache_duration: Time in seconds until expiry (default: 300s)
+        :param int cache_duration: Time in seconds until expiry (default: 24h)
         """
         permissions = None
         if cache_duration:  # Caching active
-            # TODO: Check if cache still valid
-            # If last request > 1' request to permssion service
-            # self.cache.init() if not valid
+            # check if cache is still valid
+            if (self.last_update_check is None
+                or self.last_update_check +
+                    self.config_check_interval < time.time()):
+                # get last permissions update from permission service
+                url = urljoin(self.service_url, 'last_update')
+                response = requests.get(url, headers=self.headers, timeout=30)
+                if response.status_code == requests.codes.ok:
+                    permissions_updated_at = datetime.strptime(
+                        response.json()['permissions_updated_at'],
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+                    if (self.last_cache_flush is None
+                            or self.last_cache_flush < permissions_updated_at):
+                        # flush cache if obsolete
+                        self.cache.init()
+                        self.last_cache_flush = permissions_updated_at
+
+                self.last_update_check = time.time()
+
+            # get permissions from cache
             permissions = self.cache.read(
                 service, username, params.values())
             if permissions:
@@ -67,7 +97,7 @@ class PermissionClient():
         :param str username: User name
         """
         return self.service_permissions(
-            'data', {'dataset': dataset}, username
+            'data', {'dataset': dataset}, username, self.default_cache_duration
         )
 
     def document_permissions(self, template, username):
@@ -77,7 +107,8 @@ class PermissionClient():
         :param str username: User name
         """
         return self.service_permissions(
-            'document', {'template': template}, username
+            'document', {'template': template}, username,
+            self.default_cache_duration
         )
 
     def feature_info_permissions(self, ows_name, username):
@@ -87,7 +118,8 @@ class PermissionClient():
         :param str username: User name
         """
         return self.service_permissions(
-            'feature_info', {'ows_name': ows_name}, username
+            'feature_info', {'ows_name': ows_name}, username,
+            self.default_cache_duration
         )
 
     def ogc_permissions(self, ows_name, ows_type, username):
@@ -98,7 +130,8 @@ class PermissionClient():
         :param str username: User name
         """
         return self.service_permissions(
-            'ogc', {'ows_name': ows_name, 'ows_type': ows_type}, username
+            'ogc', {'ows_name': ows_name, 'ows_type': ows_type}, username,
+            self.default_cache_duration
         )
 
     def print_permissions(self, template, username):
@@ -108,16 +141,18 @@ class PermissionClient():
         :param str username: User name
         """
         return self.service_permissions(
-            'print', {'template': template}, username
+            'print', {'template': template}, username,
+            self.default_cache_duration
         )
 
     def qwc_permissions(self, username):
-        """Return data for QWC themes.json for available and permitted resources.
+        """Return data for QWC themes.json for available and permitted
+        resources.
 
         :param str username: User name
         """
         return self.service_permissions(
-            'qwc', {}, username, cache_duration=300  # TODO: 10*3600
+            'qwc', {}, username, self.default_cache_duration
         )
 
     def dataset_search_permissions(self, dataset, username):
@@ -127,5 +162,6 @@ class PermissionClient():
         :param str username: User name
         """
         return self.service_permissions(
-            'search', {'dataset': dataset}, username
+            'search', {'dataset': dataset}, username,
+            self.default_cache_duration
         )
