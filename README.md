@@ -14,6 +14,7 @@ Applications:
 REST services:
 * [Config service](https://github.com/qwc-services/qwc-config-service)
 * [OGC service](https://github.com/qwc-services/qwc-ogc-service)
+* [Data service](https://github.com/qwc-services/qwc-data-service)
 
 Configuration database:
 * [DB schema and migrations](https://github.com/qwc-services/qwc-config-db)
@@ -42,6 +43,10 @@ Clone [QWC OGC service](https://github.com/qwc-services/qwc-ogc-service):
 
     git clone https://github.com/qwc-services/qwc-ogc-service.git
 
+Clone [QWC Data service](https://github.com/qwc-services/qwc-data-service):
+
+    git clone https://github.com/qwc-services/qwc-data-service.git
+
 Clone [QWC Map Viewer](https://github.com/qwc-services/qwc-map-viewer):
 
     git clone https://github.com/qwc-services/qwc-map-viewer.git
@@ -62,6 +67,9 @@ Run local services (set `$QGIS_SERVER_URL` to your QGIS server and `$QWC2_PATH` 
     cd qwc-ogc-service/
     QGIS_SERVER_URL=http://localhost:8001/ows/ CONFIG_SERVICE_URL=http://localhost:5010/ python server.py
 
+    cd qwc-data-service/
+    CONFIG_SERVICE_URL=http://localhost:5010/ python server.py
+
     cd qwc-map-viewer/
     OGC_SERVICE_URL=http://localhost:5013/ CONFIG_SERVICE_URL=http://localhost:5010/ QWC2_PATH=qwc2/ python server.py
 
@@ -73,6 +81,7 @@ Sample requests:
     curl 'http://localhost:5010/ogc?ows_type=WMS&ows_name=qwc_demo'
     curl 'http://localhost:5010/qwc'
     curl 'http://localhost:5013/qwc_demo?VERSION=1.1.1&SERVICE=WMS&REQUEST=GetCapabilities'
+    curl 'http://localhost:5012/qwc_demo.edit_points/'
     curl 'http://localhost:5030/themes.json'
     curl 'http://localhost:5031'
 
