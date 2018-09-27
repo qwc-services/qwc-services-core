@@ -34,100 +34,57 @@ class PermissionClient():
         self.last_update_check = None
         self.last_cache_flush = None
 
-    def resource_permissions(self, resource_type, params, username,
-                             cache_duration=86400):
+    def resource_permissions(self, resource_type, username,
+                             name=None, parent_id=None):
         """Return permitted resources for a resource type.
 
         :param str resource_type: Resource type
-        :param obj params: Optional request parameters with
-                           name=<name filter>&parent_id=<parent filter>
         :param str username: User name
-        :param int cache_duration: Time in seconds until expiry (default: 24h)
+        :param str name: Optional name filter
+        :param str parent_id: Optional parent_id filter
         """
-        permissions = None
+        params = {
+            'resource_type': resource_type,
+            'name': name,
+            'parent_id': parent_id
+        }
+        return self.query_permissions(
+            'resource_permissions', 'permissions/%s' % resource_type, params,
+            username, self.default_cache_duration, convert_int_keys=True
+        )
 
-        cache_key = "permitted_%s" % resource_type
-
-        if cache_duration:  # Caching active
-            # check if cache is still valid
-            self.check_cache()
-
-            # get permissions from cache
-            permissions = self.cache.read(
-                cache_key, username, params.values())
-            if permissions:
-                return permissions
-
-        # build request URL: http://<service_url>/permissions/<resource_type>
-        url = urljoin(self.service_url, 'permissions/%s' % resource_type)
-
-        reqparams = params.copy()  # don't change params before cache.write
-        if username:
-            reqparams.update({'username': username})
-
-        # send request to permission service
-        response = requests.get(url, headers=self.headers, params=reqparams,
-                                timeout=30)
-        if response.status_code == requests.codes.ok:
-            permissions = response.json()['permissions']
-
-        if cache_duration:  # Caching active
-            self.cache.write(cache_key, username, params.values(),
-                             permissions, cache_duration)
-
-        return permissions
-
-    def resource_restrictions(self, resource_type, params, username,
-                              cache_duration=86400):
+    def resource_restrictions(self, resource_type, username,
+                              name=None, parent_id=None):
         """Return restricted resources for a resource type.
 
         :param str resource_type: Resource type
-        :param obj params: Optional request parameters with
-                           name=<name filter>&parent_id=<parent filter>
         :param str username: User name
-        :param int cache_duration: Time in seconds until expiry (default: 24h)
+        :param str name: Optional name filter
+        :param str parent_id: Optional parent_id filter
         """
-        restrictions = None
+        params = {
+            'resource_type': resource_type,
+            'name': name,
+            'parent_id': parent_id
+        }
+        return self.query_permissions(
+            'resource_restrictions', 'restrictions/%s' % resource_type, params,
+            username, self.default_cache_duration, 'restrictions', True
+        )
 
-        cache_key = "restricted_%s" % resource_type
+    def query_permissions(self, cache_key, path, params, username,
+                          cache_duration=86400, response_key='permissions',
+                          convert_int_keys=False):
+        """Return permissions or restrictions for a service or resource type.
 
-        if cache_duration:  # Caching active
-            # check if cache is still valid
-            self.check_cache()
-
-            # get restrictions from cache
-            restrictions = self.cache.read(
-                cache_key, username, params.values())
-            if restrictions:
-                return restrictions
-
-        # build request URL: http://<service_url>/restrictions/<resource_type>
-        url = urljoin(self.service_url, 'restrictions/%s' % resource_type)
-
-        reqparams = params.copy()  # don't change params before cache.write
-        if username:
-            reqparams.update({'username': username})
-
-        # send request to permission service
-        response = requests.get(url, headers=self.headers, params=reqparams,
-                                timeout=30)
-        if response.status_code == requests.codes.ok:
-            restrictions = response.json()['restrictions']
-
-        if cache_duration:  # Caching active
-            self.cache.write(cache_key, username, params.values(),
-                             restrictions, cache_duration)
-
-        return restrictions
-
-    def service_permissions(self, service, params, username,
-                            cache_duration=86400):
-        """Return service permissions if available and permitted.
-
-        :param str service: Service type
-        :param obj params: Service specific request parameters
+        :param str cache_key: Key for cache lookup
+        :param str path: Path for permissions ervice request
+        :param obj params: Query specific request parameters
         :param str username: User name
         :param int cache_duration: Time in seconds until expiry (default: 24h)
+        :param str response_key: Permissions key in JSON response
+                                 (default: 'permissions')
+        :paras bool convert_int_keys: Convert JSON integer keys to int
         """
         permissions = None
         if cache_duration:  # Caching active
@@ -136,12 +93,12 @@ class PermissionClient():
 
             # get permissions from cache
             permissions = self.cache.read(
-                service, username, params.values())
+                cache_key, username, params.values())
             if permissions:
                 return permissions
 
-        # build request URL: http://<service_url>/<service>
-        url = urljoin(self.service_url, '%s' % service)
+        # build request URL: http://<service_url>/<path>
+        url = urljoin(self.service_url, '%s' % path)
 
         reqparams = params.copy()  # don't change params before cache.write
         if username:
@@ -151,10 +108,21 @@ class PermissionClient():
         response = requests.get(url, headers=self.headers, params=reqparams,
                                 timeout=30)
         if response.status_code == requests.codes.ok:
-            permissions = response.json()['permissions']
+            if convert_int_keys:
+                permissions = {}
+                result = response.json()[response_key]
+                for key, value in result.items():
+                    # convert integer keys from JSON from string to int
+                    try:
+                        key = int(key)
+                    except ValueError:
+                        pass
+                    permissions[key] = value
+            else:
+                permissions = response.json()[response_key]
 
         if cache_duration:  # Caching active
-            self.cache.write(service, username, params.values(),
+            self.cache.write(cache_key, username, params.values(),
                              permissions, cache_duration)
 
         return permissions
@@ -165,8 +133,9 @@ class PermissionClient():
         :param str dataset: Dataset ID
         :param str username: User name
         """
-        return self.service_permissions(
-            'data', {'dataset': dataset}, username, self.default_cache_duration
+        return self.query_permissions(
+            'data', 'data', {'dataset': dataset}, username,
+            self.default_cache_duration
         )
 
     def document_permissions(self, template, username):
@@ -175,8 +144,8 @@ class PermissionClient():
         :param str dataset: Template ID
         :param str username: User name
         """
-        return self.service_permissions(
-            'document', {'template': template}, username,
+        return self.query_permissions(
+            'document', 'document', {'template': template}, username,
             self.default_cache_duration
         )
 
@@ -186,8 +155,8 @@ class PermissionClient():
         :param str ows_name: WMS service name
         :param str username: User name
         """
-        return self.service_permissions(
-            'feature_info', {'ows_name': ows_name}, username,
+        return self.query_permissions(
+            'feature_info', 'feature_info', {'ows_name': ows_name}, username,
             self.default_cache_duration
         )
 
@@ -198,9 +167,9 @@ class PermissionClient():
         :param str ows_type: OWS type (WMS or WFS)
         :param str username: User name
         """
-        return self.service_permissions(
-            'ogc', {'ows_name': ows_name, 'ows_type': ows_type}, username,
-            self.default_cache_duration
+        return self.query_permissions(
+            'ogc', 'ogc', {'ows_name': ows_name, 'ows_type': ows_type},
+            username, self.default_cache_duration
         )
 
     def print_permissions(self, template, username):
@@ -209,8 +178,8 @@ class PermissionClient():
         :param str dataset: Template ID
         :param str username: User name
         """
-        return self.service_permissions(
-            'print', {'template': template}, username,
+        return self.query_permissions(
+            'print', 'print', {'template': template}, username,
             self.default_cache_duration
         )
 
@@ -220,8 +189,8 @@ class PermissionClient():
 
         :param str username: User name
         """
-        return self.service_permissions(
-            'qwc', {}, username, self.default_cache_duration
+        return self.query_permissions(
+            'qwc', 'qwc', {}, username, self.default_cache_duration
         )
 
     def dataset_search_permissions(self, dataset, username):
@@ -230,8 +199,8 @@ class PermissionClient():
         :param str dataset: Dataset ID
         :param str username: User name
         """
-        return self.service_permissions(
-            'search', {'dataset': dataset}, username,
+        return self.query_permissions(
+            'search', 'search', {'dataset': dataset}, username,
             self.default_cache_duration
         )
 
