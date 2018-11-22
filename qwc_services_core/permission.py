@@ -1,7 +1,6 @@
 from datetime import datetime
 import os
 import time
-from urllib.parse import urljoin
 
 import requests
 
@@ -98,7 +97,7 @@ class PermissionClient():
                 return permissions
 
         # build request URL: http://<service_url>/<path>
-        url = urljoin(self.service_url, '%s' % path)
+        url = self.service_url + path
 
         reqparams = params.copy()  # don't change params before cache.write
         if username:
@@ -210,7 +209,7 @@ class PermissionClient():
             or self.last_update_check +
                 self.config_check_interval < time.time()):
             # get last permissions update from permission service
-            url = urljoin(self.service_url, 'last_update')
+            url = self.service_url + 'last_update'
             response = requests.get(url, headers=self.headers, timeout=30)
             if response.status_code == requests.codes.ok:
                 permissions_updated_at = datetime.strptime(
