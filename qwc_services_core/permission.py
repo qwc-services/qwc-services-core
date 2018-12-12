@@ -33,12 +33,12 @@ class PermissionClient():
         self.last_update_check = None
         self.last_cache_flush = None
 
-    def resource_permissions(self, resource_type, username,
+    def resource_permissions(self, resource_type, identity,
                              name=None, parent_id=None):
         """Return permitted resources for a resource type.
 
         :param str resource_type: Resource type
-        :param str username: User name
+        :param obj identity: User name or Identity dict
         :param str name: Optional name filter
         :param str parent_id: Optional parent_id filter
         """
@@ -49,15 +49,15 @@ class PermissionClient():
         }
         return self.query_permissions(
             'resource_permissions', 'permissions/%s' % resource_type, params,
-            username, self.default_cache_duration, convert_int_keys=True
+            identity, self.default_cache_duration, convert_int_keys=True
         )
 
-    def resource_restrictions(self, resource_type, username,
+    def resource_restrictions(self, resource_type, identity,
                               name=None, parent_id=None):
         """Return restricted resources for a resource type.
 
         :param str resource_type: Resource type
-        :param str username: User name
+        :param obj identity: User name or Identity dict
         :param str name: Optional name filter
         :param str parent_id: Optional parent_id filter
         """
@@ -68,10 +68,10 @@ class PermissionClient():
         }
         return self.query_permissions(
             'resource_restrictions', 'restrictions/%s' % resource_type, params,
-            username, self.default_cache_duration, 'restrictions', True
+            identity, self.default_cache_duration, 'restrictions', True
         )
 
-    def query_permissions(self, cache_key, path, params, username,
+    def query_permissions(self, cache_key, path, params, identity,
                           cache_duration=86400, response_key='permissions',
                           convert_int_keys=False):
         """Return permissions or restrictions for a service or resource type.
@@ -79,7 +79,7 @@ class PermissionClient():
         :param str cache_key: Key for cache lookup
         :param str path: Path for permissions ervice request
         :param obj params: Query specific request parameters
-        :param str username: User name
+        :param obj identity: User name or Identity dict
         :param int cache_duration: Time in seconds until expiry (default: 24h)
         :param str response_key: Permissions key in JSON response
                                  (default: 'permissions')
@@ -92,7 +92,7 @@ class PermissionClient():
 
             # get permissions from cache
             permissions = self.cache.read(
-                cache_key, username, params.values())
+                cache_key, identity, params.values())
             if permissions:
                 return permissions
 
@@ -100,8 +100,15 @@ class PermissionClient():
         url = self.service_url + path
 
         reqparams = params.copy()  # don't change params before cache.write
-        if username:
-            reqparams.update({'username': username})
+        if identity:
+            if isinstance(identity, dict):
+                reqparams.update({
+                    'username': identity.get('username'),
+                    'group': identity.get('group')
+                })
+            else:
+                # identity is username
+                reqparams.update({'username': identity})
 
         # send request to permission service
         response = requests.get(url, headers=self.headers, params=reqparams,
@@ -121,85 +128,85 @@ class PermissionClient():
                 permissions = response.json()[response_key]
 
         if cache_duration:  # Caching active
-            self.cache.write(cache_key, username, params.values(),
+            self.cache.write(cache_key, identity, params.values(),
                              permissions, cache_duration)
 
         return permissions
 
-    def dataset_edit_permissions(self, dataset, username):
+    def dataset_edit_permissions(self, dataset, identity):
         """Return dataset edit permissions if available and permitted.
 
         :param str dataset: Dataset ID
-        :param str username: User name
+        :param obj identity: User name or Identity dict
         """
         return self.query_permissions(
-            'data', 'data', {'dataset': dataset}, username,
+            'data', 'data', {'dataset': dataset}, identity,
             self.default_cache_duration
         )
 
-    def document_permissions(self, template, username):
+    def document_permissions(self, template, identity):
         """Return document template permissions if available and permitted.
 
         :param str dataset: Template ID
-        :param str username: User name
+        :param obj identity: User name or Identity dict
         """
         return self.query_permissions(
-            'document', 'document', {'template': template}, username,
+            'document', 'document', {'template': template}, identity,
             self.default_cache_duration
         )
 
-    def feature_info_permissions(self, ows_name, username):
+    def feature_info_permissions(self, ows_name, identity):
         """Return feature info template permissions if available and permitted.
 
         :param str ows_name: WMS service name
-        :param str username: User name
+        :param obj identity: User name or Identity dict
         """
         return self.query_permissions(
-            'feature_info', 'feature_info', {'ows_name': ows_name}, username,
+            'feature_info', 'feature_info', {'ows_name': ows_name}, identity,
             self.default_cache_duration
         )
 
-    def ogc_permissions(self, ows_name, ows_type, username):
+    def ogc_permissions(self, ows_name, ows_type, identity):
         """Return OGC service permissions if available and permitted.
 
         :param str ows_name: OWS service name
         :param str ows_type: OWS type (WMS or WFS)
-        :param str username: User name
+        :param obj identity: User name or Identity dict
         """
         return self.query_permissions(
             'ogc', 'ogc', {'ows_name': ows_name, 'ows_type': ows_type},
-            username, self.default_cache_duration
+            identity, self.default_cache_duration
         )
 
-    def print_permissions(self, template, username):
+    def print_permissions(self, template, identity):
         """Return print template permissions if available and permitted.
 
         :param str dataset: Template ID
-        :param str username: User name
+        :param obj identity: User name or Identity dict
         """
         return self.query_permissions(
-            'print', 'print', {'template': template}, username,
+            'print', 'print', {'template': template}, identity,
             self.default_cache_duration
         )
 
-    def qwc_permissions(self, username):
+    def qwc_permissions(self, identity):
         """Return data for QWC themes.json for available and permitted
         resources.
 
-        :param str username: User name
+        :param obj identity: User name or Identity dict
         """
         return self.query_permissions(
-            'qwc', 'qwc', {}, username, self.default_cache_duration
+            'qwc', 'qwc', {}, identity, self.default_cache_duration
         )
 
-    def dataset_search_permissions(self, dataset, username):
+    def dataset_search_permissions(self, dataset, identity):
         """Return dataset search permissions if available and permitted.
 
         :param str dataset: Dataset ID
-        :param str username: User name
+        :param obj identity: User name or Identity dict
         """
         return self.query_permissions(
-            'search', 'search', {'dataset': dataset}, username,
+            'search', 'search', {'dataset': dataset}, identity,
             self.default_cache_duration
         )
 
