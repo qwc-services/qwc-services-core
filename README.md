@@ -4,6 +4,44 @@ QWC Services Core
 Shared modules for QWC services and documentation for setup.
 
 
+Overview
+--------
+
+The QWC Services are a collection of microservices providing configurations for and authorized access to different QWC Map Viewer components.
+
+                                   external services    |    internal services    
+                                                        |
+    +-------------------+
+    |                   |
+    |  Admin GUI        +-----------------------------------------------------------------------------+
+    |                   |                                                                             |
+    +-------------------+                                                                             |
+                                                                                                      |
+                                +-------------------+                                                 |
+                 authentication |                   |                                                 |
+              +----------------->  Auth Service     +-----------------------------------------+       |
+              |                 |  (qwc-db-auth)    |                                         |       |
+              |                 +-------------------+                                         |       |
+              |                                                                               |       |
+    +---------+---------+                                                                     |       |
+    |                   |  viewer config and maps                                             |       |
+    |  QWC Map Viewer   +---------------------------------------------+                       |       |
+    |                   |                                             |                       |       |
+    +---------+---------+                                             |                       |       |
+              |                                                       |                       |       |
+              |                 +-------------------+       +---------v---------+       .-----v-------v-----.
+              |  GeoJSON        |                   |       |                   +------->                   |
+              +----------------->  Data Service     +---+--->  Config Service   |       |  Config DB        |
+              |                 |                   |   |   |                   +---+   |                   |
+              |                 +-------------------+   |   +---------+---------+   |   '-------------------'
+              |                                         |             |             |
+              |                 +-------------------+   |   +---------v---------+   |   .-------------------.
+              |  WMS            |                   +---+   |                   |   +--->                   |
+              +----------------->  OGC Service      |       |  QGIS Server      |       |  Geo DB           |
+                                |                   +------->                   +------->                   |
+                                +-------------------+       +-------------------+       '-------------------'
+
+
 QWC Services
 ------------
 
@@ -15,6 +53,7 @@ REST services:
 * [Config service](https://github.com/qwc-services/qwc-config-service)
 * [OGC service](https://github.com/qwc-services/qwc-ogc-service)
 * [Data service](https://github.com/qwc-services/qwc-data-service)
+* [Authentication service with local user database](https://github.com/qwc-services/qwc-db-auth)
 
 Configuration database:
 * [DB schema and migrations](https://github.com/qwc-services/qwc-config-db)
