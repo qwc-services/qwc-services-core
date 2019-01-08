@@ -4,6 +4,15 @@ QWC Services Core
 Shared modules for QWC services and documentation for setup.
 
 
+Table of Contents
+-----------------
+
+- [Overview](#overview)
+- [QWC Services](#qwc-services)
+- [Quick start](#quick-start)
+- [Development](#development)
+
+
 Overview
 --------
 
@@ -60,6 +69,87 @@ Configuration database:
 
 Docker:
 * [Docker containers for QWC services](https://github.com/qwc-services/qwc-docker)
+
+
+Quick start
+-----------
+
+### Docker containers for QWC services
+
+Create a QWC services dir:
+
+    mkdir qwc-services
+    cd qwc-services/
+
+Clone [Docker containers for QWC services](https://github.com/qwc-services/qwc-docker):
+
+    git clone https://github.com/qwc-services/qwc-docker.git
+
+Install Docker and setup containers (see [qwc-docker README](https://github.com/qwc-services/qwc-docker#setup)):
+
+    cd qwc-docker/
+    cp docker-compose-example.yml docker-compose.yml
+    cp volumes/qwc2/themesConfig-example.json volumes/qwc2/themesConfig.json
+    docker-compose build
+
+Clone and build QWC2 Demo App (see [Quick start](https://github.com/qgis/qwc2-demo-app/blob/master/doc/QWC2_Documentation.md#quick-start)) (or use your custom QWC2 build):
+
+    cd ..
+    git clone --recursive https://github.com/qgis/qwc2-demo-app.git
+    cd qwc2-demo-app/
+    yarn install
+    yarn run build
+
+**NOTE:** The basic [QWC2 Demo App](https://github.com/qgis/qwc2-demo-app) build does not include a sign in menu entry or editing.
+
+Copy QWC2 files from a build:
+
+    cd ../qwc-docker/
+    SRCDIR=../qwc2-demo-app/ DSTDIR=$PWD/volumes
+    cd $SRCDIR && \
+    cp -r assets $DSTDIR/qwc2 && \
+    cp -r translations/data.* $DSTDIR/qwc2 && \
+    cp dist/QWC2App.js $DSTDIR/qwc2/dist/ && \
+    cp index.html $DSTDIR/qwc2/ && \
+    sed -e '/proxyServiceUrl/d' \
+      -e 's!permalinkServiceUrl":\s*".*"!permalinkServiceUrl": "/permalink"!' \
+      -e 's!elevationServiceUrl":\s*".*"!elevationServiceUrl": "/elevation"!' \
+      -e 's!searchServiceUrl":\s*".*"!searchServiceUrl": "/search"!' \
+      -e 's!editServiceUrl":\s*".*"!editServiceUrl": "/data"!' \
+      -e 's!authServiceUrl":\s*".*"!authServiceUrl": "/auth"!' \
+      -e 's!mapInfoService":\s*".*"!mapInfoService": "/mapinfo"!' \
+      -e 's!featureReportService":\s*".*"!featureReportService": "/document"!' \
+      -e 's!{"key": "Login", "icon": "img/login.svg"}!{{ login_logout_item }}!g' \
+      config.json > $DSTDIR/qwc2/config.json && \
+    cd -
+
+Start all containers:
+
+    docker-compose up -d
+
+Follow log output:
+
+    docker-compose logs -f
+
+Open map viewer:
+
+    http://localhost:8088/
+
+Open Admin GUI (Admin user: `admin:admin`, requires password change on first login):
+
+    http://localhost:8088/qwc_admin
+
+Sign in (Demo user: `demo:demo`):
+
+    http://localhost:8088/auth/login
+
+Sign out:
+
+    http://localhost:8088/auth/logout
+
+Stop all containers:
+
+    docker-compose down
 
 
 Development
