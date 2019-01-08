@@ -13,6 +13,9 @@ Table of Contents
 - [Configuration](#configuration)
     - [Configuration database](#configuration-database)
     - [Service configurations](#service-configurations)
+- [Resources and Permissions](#resources-and-permissions)
+    - [Resources](#resources)
+    - [Permissions](#permissions)
 - [Development](#development)
 
 
@@ -206,7 +209,7 @@ ENV (optional)                          | default value                         
 `SEARCH_SERVICE_URL`                    | from `config.json`                    | QWC Search service URL
 
 
-Custom viewer configurations can be added by placing a `<viewer>.json` and/or `<viewer>.html` for each custom viewer into the `$QWC2_VIEWERS_PATH` directory. The custom viewers can be opened by appending the viewer name to the base URL: `http://localhost:8088/<viewer>/`.
+[Custom viewer configurations](https://github.com/qwc-services/qwc-map-viewer#custom-viewer-configurations) can be added by placing a `<viewer>.json` and/or `<viewer>.html` for each custom viewer into the `$QWC2_VIEWERS_PATH` directory. The custom viewers can be opened by appending the viewer name to the base URL: `http://localhost:8088/<viewer>/`.
 
 
 #### [Admin GUI](https://github.com/qwc-services/qwc-admin-gui#configuration)
@@ -229,7 +232,7 @@ ENV                                     | default value                         
 `QGIS_RESOURCES_PATH`                   | `qgs/`                                | QGIS project files path
 `QWC2_PATH`                             | `qwc2/`                               | QWC2 files path
 `QWC2_THEMES_CONFIG`                    | `$QWC2_PATH/themesConfig.json`        | QWC2 `themesConfig.json` path
-`DEFAULT_ALLOW`                         | `True`                                | set whether some resources are permitted or restricted by default
+`DEFAULT_ALLOW`                         | `True`                                | set whether some resources are permitted or restricted by default (see [Permissions](#permissions))
 
 
 #### [OGC service](https://github.com/qwc-services/qwc-ogc-service#usage)
@@ -284,6 +287,63 @@ failed login attempts before sign in is blocked for an user
 `MAIL_MAX_EMAILS`                       | `None`                                | "
 `MAIL_SUPPRESS_SEND`                    | `app.testing`                         | "
 `MAIL_ASCII_ATTACHMENTS`                | `False`                               | "
+
+
+Resources and Permissions
+-------------------------
+
+Permissions and configurations are based on different resources with assigned permissions in the [configuration database](https://github.com/qwc-services/qwc-config-db).
+These can be managed in the [QWC configuration backend](https://github.com/qwc-services/qwc-admin-gui).
+
+
+### Resources
+
+The following resource types are available:
+
+* `map`: WMS corresponding to a QGIS Project
+    * `layer`: layer of a map
+        * `attribute`: attribute of a map layer
+    * `print_template`: print composer template of a QGIS Project
+    * `data`: Data layer for editing
+        * `attribute`: attribute of a data layer
+    * `data_create`: Data layer for creating features
+    * `data_read`: Data layer for reading features
+    * `data_update`: Data layer for updating features
+    * `data_delete`: Data layer for deleting features
+* `viewer`: custom map viewer configuration
+
+The resource `name` corresponds to the technical name of its resource (e.g. WMS layer name).
+
+The resource types can be extended by inserting new types into the `qwc_config.resource_types` table.
+These can be queried, e.g. in a custom service, by using `PermissionClient::resource_permissions()` or 
+`PermissionClient::resource_restrictions()` from [QWC Services Core](https://github.com/qwc-services/qwc-services-core).
+
+Available `map`, `layer`, `attribute` and `print_template` resources are collected from WMS `GetProjectSettings` and the QGIS projects.
+
+`data` and their `attribute` resources define a data layer for the [Data service](https://github.com/qwc-services/qwc-data-service).
+Database connections and attribute metadata are collected from the QGIS projects.
+
+For more detailed CRUD permissions `data_create`, `data_read`, `data_update` and `data_delete` can be used instead of `data` 
+(`data` and `write=False` is equivalent to `data_read`; `data` and `write=True` is equivalent to all CRUD resources combined).
+
+The `viewer` resource defines a [custom viewer configuration](https://github.com/qwc-services/qwc-map-viewer#custom-viewer-configurations) for the map viewer.
+
+
+### Permissions
+
+Permissions are based on roles. Roles can be assigned to groups or users, and users can be members of groups.
+A special role is `public`, which is always included, whether a user is signed in or not.
+
+Each role can be assigned a permission for a resource.
+The `write` flag is only used for `data` resources and sets whether a data layer is read-only.
+
+Based on the user's identity (user name and/or group name), all corresponding roles and their permissions and restrictions are collected.
+The service configurations are then modified according to these permissions and restrictions.
+
+Using the `DEFAULT_ALLOW` environment variable, some resources can be set to be permitted or restricted by default if no permissions are set (default: `False`). Affected resources are `map`, `layer` and `print_template`.
+
+e.g. `DEFAULT_ALLOW=True`: all maps and layers are permitted by default
+e.g. `DEFAULT_ALLOW=False`: maps and layers are only available if their resources and permissions are explicitly configured
 
 
 Development
