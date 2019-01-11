@@ -311,6 +311,7 @@ The following resource types are available:
     * `data_update`: Data layer for updating features
     * `data_delete`: Data layer for deleting features
 * `viewer`: custom map viewer configuration
+* `viewer_task`: permittable viewer tasks
 
 The resource `name` corresponds to the technical name of its resource (e.g. WMS layer name).
 
@@ -326,7 +327,10 @@ Database connections and attribute metadata are collected from the QGIS projects
 For more detailed CRUD permissions `data_create`, `data_read`, `data_update` and `data_delete` can be used instead of `data` 
 (`data` and `write=False` is equivalent to `data_read`; `data` and `write=True` is equivalent to all CRUD resources combined).
 
-The `viewer` resource defines a [custom viewer configuration](https://github.com/qwc-services/qwc-map-viewer#custom-viewer-configurations) for the map viewer.
+The `viewer` resource defines a custom viewer configuration for the map viewer (see [Custom viewer configurations](https://github.com/qwc-services/qwc-map-viewer#custom-viewer-configurations)).
+
+The `viewer_task` resource defines viewer functionalities (e.g. printing or raster export) that can be restricted or permitted.
+Their `name` (e.g. `RasterExport`) corresponds to the `key` in `menuItems` and `toolbarItems` in the QWC2 `config.json`. Restricted viewer task items are then removed from the menu and toolbar in the map viewer. Viewer tasks not explicitly added as resources are kept unchanged from the `config.json`.
 
 
 ### Permissions
@@ -340,7 +344,7 @@ The `write` flag is only used for `data` resources and sets whether a data layer
 Based on the user's identity (user name and/or group name), all corresponding roles and their permissions and restrictions are collected.
 The service configurations are then modified according to these permissions and restrictions.
 
-Using the `DEFAULT_ALLOW` environment variable, some resources can be set to be permitted or restricted by default if no permissions are set (default: `False`). Affected resources are `map`, `layer` and `print_template`.
+Using the `DEFAULT_ALLOW` environment variable, some resources can be set to be permitted or restricted by default if no permissions are set (default: `False`). Affected resources are `map`, `layer`, `print_template` and `viewer_task`.
 
 e.g. `DEFAULT_ALLOW=True`: all maps and layers are permitted by default
 e.g. `DEFAULT_ALLOW=False`: maps and layers are only available if their resources and permissions are explicitly configured
