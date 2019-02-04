@@ -12,6 +12,7 @@ Table of Contents
 - [Quick start](#quick-start)
 - [Configuration](#configuration)
     - [Configuration database](#configuration-database)
+      - [Database migrations](#database_migrations)
     - [Service configurations](#service-configurations)
 - [Resources and Permissions](#resources-and-permissions)
     - [Resources](#resources)
@@ -169,6 +170,15 @@ This database uses the PostgreSQL connection service `qwc_configdb` by default, 
 
 Additional user fields are saved in the table `qwc_config.user_infos` with a a one-to-one relation to `qwc_config.users` via the `user_id` foreign key.
 To add custom user fields, add new columns to your `qwc_config.user_infos` table and set your `USER_INFO_FIELDS` accordingly (see [below](#service-configurations)).
+
+
+#### Database migrations
+
+An existing ConfigDB can be updated to the latest schema by running the database migrations from the `qwc-config-db` directory:
+
+    cd qwc-config-db/
+    git pull
+    alembic upgrade head
 
 
 ### Service configurations
