@@ -222,6 +222,7 @@ ENV                                     | default value                         
 ENV (optional)                          | default value                         | description
 ----------------------------------------|---------------------------------------|---------
 `USER_INFO_FIELDS`                      | `[]`                                  | custom user info fields JSON 
+`TOTP_ENABLED`                          | `False`                               | show field for TOTP secret in user form
 
 
 #### [Config service](https://github.com/qwc-services/qwc-config-service#configuration)
@@ -276,6 +277,8 @@ ENV (optional)                          | default value                         
 `MAX_LOGIN_ATTEMPTS`                    | `20`                                  | maximum number of 
 failed login attempts before sign in is blocked for an user
 `POST_PARAM_LOGIN`                      | `False`                               | activate (insecure) plain POST login
+`TOTP_ENABLED`                          | `False`                               | enable two factor authentication using TOTP
+`TOTP_ISSUER_NAME`                      | `QWC Services`                        | issuer name for TOTP QR code
 `MAIL_SERVER`                           | `localhost`                           | [Flask-Mail](https://pythonhosted.org/Flask-Mail/) options (for sending password recovery instructions)
 `MAIL_PORT`                             | `25`                                  | "
 `MAIL_USE_TLS`                          | `False`                               | "
