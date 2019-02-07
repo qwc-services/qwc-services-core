@@ -115,7 +115,7 @@ Copy QWC2 files from a build:
     SRCDIR=../qwc2-demo-app/ DSTDIR=$PWD/volumes
     cd $SRCDIR && \
     cp -r assets $DSTDIR/qwc2 && \
-    cp -r translations/data.* $DSTDIR/qwc2 && \
+    cp -r translations $DSTDIR/qwc2/ && \
     cp dist/QWC2App.js $DSTDIR/qwc2/dist/ && \
     cp index.html $DSTDIR/qwc2/ && \
     sed -e '/proxyServiceUrl/d' \
