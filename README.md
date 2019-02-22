@@ -17,6 +17,7 @@ Table of Contents
 - [Resources and Permissions](#resources-and-permissions)
     - [Resources](#resources)
     - [Permissions](#permissions)
+- [Group registration](#group_registration)
 - [Development](#development)
 
 
@@ -33,19 +34,25 @@ The QWC Services are a collection of microservices providing configurations for 
     |                   |                                                                             |
     +-------------------+                                                                             |
                                                                                                       |
-                                +-------------------+                                                 |
-                 authentication |                   |                                                 |
-              +----------------->  Auth Service     +-----------------------------------------+       |
-              |                 |  (qwc-db-auth)    |                                         |       |
-              |                 +-------------------+                                         |       |
-              |                                                                               |       |
-    +---------+---------+                                                                     |       |
-    |                   |  viewer config and maps                                             |       |
-    |  QWC Map Viewer   +---------------------------------------------+                       |       |
-    |                   |                                             |                       |       |
-    +---------+---------+                                             |                       |       |
-              |                                                       |                       |       |
-              |                 +-------------------+       +---------v---------+       .-----v-------v-----.
+    +-------------------+                                                                             |
+    |                   |  group registration requests                                                |
+    |  Registration GUI +-------------------------------------------------------------------------+   |
+    |                   |                                                                         |   |
+    +-------------------+                                                                         |   |
+                                                                                                  |   |
+                                +-------------------+                                             |   |
+                 authentication |                   |                                             |   |
+              +----------------->  Auth Service     +-----------------------------------------+   |   |
+              |                 |  (qwc-db-auth)    |                                         |   |   |
+              |                 +-------------------+                                         |   |   |
+              |                                                                               |   |   |
+    +---------+---------+                                                                     |   |   |
+    |                   |  viewer config and maps                                             |   |   |
+    |  QWC Map Viewer   +---------------------------------------------+                       |   |   |
+    |                   |                                             |                       |   |   |
+    +---------+---------+                                             |                       |   |   |
+              |                                                       |                       |   |   |
+              |                 +-------------------+       +---------v---------+       .-----v---v---v-----.
               |  GeoJSON        |                   |       |                   +------->                   |
               +----------------->  Data Service     +---+--->  Config Service   |       |  Config DB        |
               |                 |                   |   |   |                   +---+   |                   |
@@ -64,6 +71,7 @@ QWC Services
 Applications:
 * [Map Viewer](https://github.com/qwc-services/qwc-map-viewer)
 * [QWC configuration backend](https://github.com/qwc-services/qwc-admin-gui)
+* [Registration GUI](https://github.com/qwc-services/qwc-registration-gui)
 
 REST services:
 * [Config service](https://github.com/qwc-services/qwc-config-service)
@@ -233,6 +241,41 @@ ENV (optional)                          | default value                         
 ----------------------------------------|---------------------------------------|---------
 `USER_INFO_FIELDS`                      | `[]`                                  | custom user info fields JSON 
 `TOTP_ENABLED`                          | `False`                               | show field for TOTP secret in user form
+`GROUP_REGISTRATION_ENABLED`            | `True`                                | show GUI for registrable groups and group registration requests
+`MAIL_SERVER`                           | `localhost`                           | [Flask-Mail](https://pythonhosted.org/Flask-Mail/) options (for sending notifications)
+`MAIL_PORT`                             | `25`                                  | "
+`MAIL_USE_TLS`                          | `False`                               | "
+`MAIL_USE_SSL`                          | `False`                               | "
+`MAIL_DEBUG`                            | `app.debug`                           | "
+`MAIL_USERNAME`                         | `None`                                | "
+`MAIL_PASSWORD`                         | `None`                                | "
+`MAIL_DEFAULT_SENDER`                   | `None`                                | "
+`MAIL_MAX_EMAILS`                       | `None`                                | "
+`MAIL_SUPPRESS_SEND`                    | `app.testing`                         | "
+`MAIL_ASCII_ATTACHMENTS`                | `False`                               | "
+
+
+#### [Registration GUI](https://github.com/qwc-services/qwc-registration-gui#configuration)
+
+ENV                                     | default value                         | description
+----------------------------------------|---------------------------------------|---------
+`JWT_SECRET_KEY`                        | `********`                            | secret key for JWT token (same for all services) 
+
+
+ENV (optional)                          | default value                         | description
+----------------------------------------|---------------------------------------|---------
+`ADMIN_RECIPIENTS`                      | `None`                                | comma separated list of admin users who should be notified of new registration requests
+`MAIL_SERVER`                           | `localhost`                           | [Flask-Mail](https://pythonhosted.org/Flask-Mail/) options (for sending notifications)
+`MAIL_PORT`                             | `25`                                  | "
+`MAIL_USE_TLS`                          | `False`                               | "
+`MAIL_USE_SSL`                          | `False`                               | "
+`MAIL_DEBUG`                            | `app.debug`                           | "
+`MAIL_USERNAME`                         | `None`                                | "
+`MAIL_PASSWORD`                         | `None`                                | "
+`MAIL_DEFAULT_SENDER`                   | `None`                                | "
+`MAIL_MAX_EMAILS`                       | `None`                                | "
+`MAIL_SUPPRESS_SEND`                    | `app.testing`                         | "
+`MAIL_ASCII_ATTACHMENTS`                | `False`                               | "
 
 
 #### [Config service](https://github.com/qwc-services/qwc-config-service#configuration)
@@ -361,6 +404,27 @@ Using the `DEFAULT_ALLOW` environment variable, some resources can be set to be 
 
 e.g. `DEFAULT_ALLOW=True`: all maps and layers are permitted by default
 e.g. `DEFAULT_ALLOW=False`: maps and layers are only available if their resources and permissions are explicitly configured
+
+
+Group registration
+------------------
+
+Using the optional [Registration GUI](https://github.com/qwc-services/qwc-registration-gui) allows users to request membership or unsubscribe from registrable groups. These requests can then be accepted or rejected in the [Admin GUI](https://github.com/qwc-services/qwc-admin-gui).
+
+Workflow:
+* Admin GUI
+  * admin user creates new groups with assigned roles and permissions on resources
+  * admin user configures registrable groups
+* Registration GUI
+  * user select desired groups from registrable groups and submits application form
+  * admin users are notified of new registration requests
+* Admin GUI
+  * admin user selects entry from list of pending registration requests
+  * admin user accepts or rejects registration requests for a user
+  * user is added to or removed from accepted groups
+  * user is notified of registration request updates
+* Map Viewer
+  * user permissions are updated for new groups
 
 
 Development
