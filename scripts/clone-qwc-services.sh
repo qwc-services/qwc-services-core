@@ -12,7 +12,8 @@ REPOS="qwc-config-service
        qwc-data-service
        qwc-permalink-service
        qwc-print-service
-       qwc-ldap-auth"
+       qwc-ldap-auth
+       qwc-registration-gui"
 
 for repo in $REPOS; do
     if [ ! -d "${repo}" ]; then
