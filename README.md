@@ -242,6 +242,7 @@ ENV (optional)                          | default value                         
 `USER_INFO_FIELDS`                      | `[]`                                  | custom user info fields JSON 
 `TOTP_ENABLED`                          | `False`                               | show field for TOTP secret in user form
 `GROUP_REGISTRATION_ENABLED`            | `True`                                | show GUI for registrable groups and group registration requests
+`DEFAULT_LOCALE`                        | `en`                                  | set locale for notification mails
 `MAIL_SERVER`                           | `localhost`                           | [Flask-Mail](https://pythonhosted.org/Flask-Mail/) options (for sending notifications)
 `MAIL_PORT`                             | `25`                                  | "
 `MAIL_USE_TLS`                          | `False`                               | "
@@ -265,6 +266,7 @@ ENV                                     | default value                         
 ENV (optional)                          | default value                         | description
 ----------------------------------------|---------------------------------------|---------
 `ADMIN_RECIPIENTS`                      | `None`                                | comma separated list of admin users who should be notified of new registration requests
+`DEFAULT_LOCALE`                        | `en`                                  | set locale for application form and notification mails
 `MAIL_SERVER`                           | `localhost`                           | [Flask-Mail](https://pythonhosted.org/Flask-Mail/) options (for sending notifications)
 `MAIL_PORT`                             | `25`                                  | "
 `MAIL_USE_TLS`                          | `False`                               | "
