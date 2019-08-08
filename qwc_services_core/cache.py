@@ -1,4 +1,5 @@
 import time
+import copy
 
 
 class ExpiringDict:
@@ -16,7 +17,7 @@ class ExpiringDict:
         :param int duration: Time in seconds until expiry (default: 300s)
         """
         self.cache[key] = {
-            'value': value,
+            'value': copy.deepcopy(value),
             'expires': time.time() + duration
         }
 
@@ -34,7 +35,7 @@ class ExpiringDict:
             # check expiry
             if time.time() < entry['expires']:
                 # return value
-                res = {'value': entry['value']}
+                res = {'value':  copy.deepcopy(entry['value'])}
             else:
                 # remove expired value
                 del self.cache[key]
