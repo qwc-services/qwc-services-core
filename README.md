@@ -227,7 +227,7 @@ ENV (optional)                          | default value                         
 `SEARCH_SERVICE_URL`                    | from `config.json`                    | QWC Search service URL
 
 
-[Custom viewer configurations](https://github.com/qwc-services/qwc-map-viewer#custom-viewer-configurations) can be added by placing a `<viewer>.json` and/or `<viewer>.html` for each custom viewer into the `$QWC2_VIEWERS_PATH` directory. The custom viewers can be opened by appending the viewer name to the base URL: `http://localhost:8088/<viewer>/`.
+[Custom viewer configurations](https://github.com/qwc-services/qwc-map-viewer#custom-viewer-configurations) can be added by placing a `<viewer>.json`, `<viewer>_qwc.json` and/or `<viewer>.html` for each custom viewer into the `$QWC2_VIEWERS_PATH` directory. The custom viewers can be opened by appending the viewer name to the base URL: `http://localhost:8088/<viewer>/`.
 
 
 #### [Admin GUI](https://github.com/qwc-services/qwc-admin-gui#configuration)
@@ -290,6 +290,7 @@ ENV                                     | default value                         
 `QGIS_RESOURCES_PATH`                   | `qgs/`                                | QGIS project files path
 `QWC2_PATH`                             | `qwc2/`                               | QWC2 files path
 `QWC2_THEMES_CONFIG`                    | `$QWC2_PATH/themesConfig.json`        | QWC2 `themesConfig.json` path
+`QWC2_VIEWERS_PATH`                     | `$QWC2_PATH/viewers/`                 | QWC2 custom viewers path
 `DEFAULT_ALLOW`                         | `True`                                | set whether some resources are permitted or restricted by default (see [Permissions](#permissions))
 
 
