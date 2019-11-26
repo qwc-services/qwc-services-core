@@ -254,6 +254,8 @@ ENV (optional)                          | default value                         
 `MAIL_MAX_EMAILS`                       | `None`                                | "
 `MAIL_SUPPRESS_SEND`                    | `app.testing`                         | "
 `MAIL_ASCII_ATTACHMENTS`                | `False`                               | "
+`PROXY_TIMEOUT`                         | `60`s                                 | Timeout in seconds for proxy requests to internal services
+`PROXY_URL_WHITELIST`                   | `[]`                                  | JSON list of whitelisted URLs for proxy requests to internal services
 
 
 #### [Registration GUI](https://github.com/qwc-services/qwc-registration-gui#configuration)
