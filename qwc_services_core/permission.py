@@ -189,14 +189,16 @@ class PermissionClient():
             self.default_cache_duration
         )
 
-    def qwc_permissions(self, identity):
+    def qwc_permissions(self, identity, viewer=None):
         """Return data for QWC themes.json for available and permitted
         resources.
 
         :param obj identity: User name or Identity dict
+        :param str viewer: Optional custom viewer name (None for default)
         """
         return self.query_permissions(
-            'qwc', 'qwc', {}, identity, self.default_cache_duration
+            'qwc', 'qwc', {'viewer': viewer}, identity,
+            self.default_cache_duration
         )
 
     def dataset_search_permissions(self, dataset, identity):
