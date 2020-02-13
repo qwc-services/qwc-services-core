@@ -12,6 +12,8 @@ REPOS="qwc-config-service
        qwc-data-service
        qwc-permalink-service
        qwc-print-service
+       qwc-elevation-service
+       qwc-fulltext-search-service
        qwc-ldap-auth
        qwc-registration-gui"
 

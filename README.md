@@ -26,8 +26,8 @@ Overview
 
 The QWC Services are a collection of microservices providing configurations for and authorized access to different QWC Map Viewer components.
 
-                                   external services    |    internal services    
-                                                        |
+                                   external services    :    internal services
+                                                        :
     +-------------------+
     |                   |
     |  Admin GUI        +-----------------------------------------------------------------------------+
@@ -58,11 +58,18 @@ The QWC Services are a collection of microservices providing configurations for 
               |                 |                   |   |   |                   +---+   |                   |
               |                 +-------------------+   |   +---------+---------+   |   '-------------------'
               |                                         |             |             |
-              |                 +-------------------+   |   +---------v---------+   |   .-------------------.
+              |                 +-------------------+   |   +---------v---------+   |   +-------------------+
               |  WMS            |                   +---+   |                   |   +--->                   |
-              +----------------->  OGC Service      |       |  QGIS Server      |       |  Geo DB           |
-                                |                   +------->                   +------->                   |
-                                +-------------------+       +-------------------+       '-------------------'
+              +----------------->  OGC Service      |   |   |  QGIS Server      |       |  Geo DB           |
+              |                 |                   +------->                   +------->                   |
+              |                 +-------------------+   |   +-------------------+       +--^----------------+
+              |                                         |                                  |
+              |                 +-------------------+   |   +-------------------+          |
+              |                 |                   +---+   |                   |          |
+              +----------------->  Search Service   |------->  Apache Solr      +----------+
+                                |                   +---+   |                   |          |
+                                +-------------------+   |   +-------------------+          |
+                                                        +----------------------------------+
 
 
 QWC Services
