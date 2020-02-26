@@ -36,13 +36,11 @@ class RuntimeConfig:
     def get(self, name, default=None):
         val = os.environ.get(name.upper())
         if val is None:
-            val = self.config['config'][name]
-        if val is None:
-            val = default
+            val = self.config['config'].get(name, default)
         return val
 
     def resources(self):
         return self.config['resources']
 
     def resource(self, name):
-        return self.config['resources'][name]
+        return self.config['resources'].get(name)
