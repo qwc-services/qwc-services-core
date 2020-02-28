@@ -35,7 +35,7 @@ class PermissionsReader():
         """Read permissions for a tenant from a JSON file."""
         permissions = {}
 
-        permissions_path = permissions_file_path(self.tenant)
+        permissions_path = PermissionsReader.permissions_file_path(self.tenant)
         self.logger.info("Reading permissions '%s'" % permissions_path)
         try:
             with open(permissions_path, encoding='utf-8') as fh:

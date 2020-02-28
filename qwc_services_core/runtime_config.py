@@ -27,7 +27,9 @@ class RuntimeConfig:
 
         :param str tenant: Tenant ID
         """
-        runtime_config_path = config_file_path(self.service, tenant)
+        runtime_config_path = RuntimeConfig.config_file_path(
+            self.service, tenant
+        )
         self.logger.info(
             "Reading runtime config '%s'" % runtime_config_path
         )
