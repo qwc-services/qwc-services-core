@@ -3,8 +3,8 @@ import os
 import re
 from flask import request
 
-from permissions_reader import PermissionsReader
-from runtime_config import RuntimeConfig
+from .permissions_reader import PermissionsReader
+from .runtime_config import RuntimeConfig
 
 
 class TenantHandler:
