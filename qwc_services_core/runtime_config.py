@@ -6,15 +6,28 @@ class RuntimeConfig:
     '''Runtime configuration helper class
     '''
 
+    @staticmethod
+    def config_file_path(service, tenant):
+        """Return path to permissions JSON file for a tenant.
+
+        :param str servcie: Service name
+        :param str tenant: Tenant ID
+        """
+        config_path = os.environ.get('CONFIG_PATH', 'config')
+        filename = '%sConfig.json' % service
+        return safe_join(config_path, tenant, filename)
+
     def __init__(self, service, logger):
         self.service = service
         self.logger = logger
         self.config = None
 
     def read_config(self, tenant):
-        config_path = os.environ.get('CONFIG_PATH', 'config')
-        filename = '%sConfig.json' % self.service
-        runtime_config_path = safe_join(config_path, tenant, filename)
+        """Read service config for a tenant from a JSON file.
+
+        :param str tenant: Tenant ID
+        """
+        runtime_config_path = config_file_path(self.service, tenant)
         self.logger.info(
             "Reading runtime config '%s'" % runtime_config_path
         )

@@ -12,6 +12,15 @@ class PermissionsReader():
     # name of public role
     PUBLIC_ROLE_NAME = 'public'
 
+    @staticmethod
+    def permissions_file_path(tenant):
+        """Return path to permissions JSON file for a tenant.
+
+        :param str tenant: Tenant ID
+        """
+        config_path = os.environ.get('CONFIG_PATH', 'config')
+        return safe_join(config_path, tenant, 'permissions.json')
+
     def __init__(self, tenant, logger):
         """Constructor
 
@@ -26,10 +35,7 @@ class PermissionsReader():
         """Read permissions for a tenant from a JSON file."""
         permissions = {}
 
-        config_path = os.environ.get('CONFIG_PATH', 'config')
-        permissions_path = safe_join(
-            config_path, self.tenant, 'permissions.json'
-        )
+        permissions_path = permissions_file_path(self.tenant)
         self.logger.info("Reading permissions '%s'" % permissions_path)
         try:
             with open(permissions_path, encoding='utf-8') as fh:
