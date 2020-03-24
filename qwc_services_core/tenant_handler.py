@@ -50,7 +50,7 @@ class TenantHandler:
             if handler:
                 # check for config updates
                 last_update = self.last_config_update(service_name, tenant)
-                if last_update < handler.get('last_update'):
+                if last_update and last_update < handler.get('last_update'):
                     # cache is up-to-date
                     return handler.get('handler')
                 else:
