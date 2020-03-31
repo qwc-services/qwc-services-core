@@ -7,6 +7,9 @@ from .permissions_reader import PermissionsReader
 from .runtime_config import RuntimeConfig
 
 
+DEFAULT_TENANT = 'default'
+
+
 class TenantHandler:
     """Tenant handling class
     """
@@ -18,21 +21,32 @@ class TenantHandler:
         """
         self.logger = logger
         self.tenant_name = os.environ.get('QWC_TENANT')
-        self.tenant_re = os.environ.get('TENANT_REFERRER_RE')
-        if self.tenant_re:
-            self.tenant_re = re.compile(self.tenant_re)
+        self.tenant_url_re = os.environ.get('TENANT_URL_RE')
+        if self.tenant_url_re:
+            self.tenant_url_re = re.compile(self.tenant_url_re)
+        self.tenant_referrer_re = os.environ.get('TENANT_REFERRER_RE')
+        if self.tenant_referrer_re:
+            self.tenant_referrer_re = re.compile(self.tenant_referrer_re)
         self.handler_cache = {}  # handler_cache[handler_name][tenant]
 
     def tenant(self, identity):
-        # TODO: support tenant in identity
         if self.tenant_name:
             return self.tenant_name
-        if self.tenant_re and request.referrer:
-            # Extract from referrer URL
-            match = self.tenant_re.match(request.referrer)
+        if self.tenant_url_re:
+            # self.logger.debug("Extracting tenant from base_url %s" %
+            #                   request.base_url)
+            match = self.tenant_url_re.match(request.base_url)
             if match:
                 return match.group(1)
-        return 'default'
+            else:
+                return DEFAULT_TENANT
+        if self.tenant_referrer_re and request.referrer:
+            # self.logger.debug("Extracting tenant from referrer URL %s" %
+            #                   request.referrer)
+            match = self.tenant_referrer_re.match(request.referrer)
+            if match:
+                return match.group(1)
+        return DEFAULT_TENANT
 
     def handler(self, service_name, handler_name, tenant):
         """Get service handler for tenant.
