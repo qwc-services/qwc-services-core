@@ -29,7 +29,7 @@ class TenantHandler:
             self.tenant_referrer_re = re.compile(self.tenant_referrer_re)
         self.handler_cache = {}  # handler_cache[handler_name][tenant]
 
-    def tenant(self, identity):
+    def tenant(self):
         if self.tenant_name:
             return self.tenant_name
         if self.tenant_url_re:
