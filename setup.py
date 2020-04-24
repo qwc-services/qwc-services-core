@@ -9,7 +9,7 @@ Shared modules for QWC services.
 
 setuptools.setup(
     name="qwc-services-core",
-    version="0.1.1",
+    version="0.1.2",
     author="Sourcepole AG",
     author_email="info@sourcepole.ch",
     description="Shared modules for QWC services",
@@ -22,5 +22,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.5',
 )
