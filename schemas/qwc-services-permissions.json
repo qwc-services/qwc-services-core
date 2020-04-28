@@ -1,0 +1,284 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/qwc-services/qwc-services-core/master/schemas/qwc-services-permissions.json",
+  "title": "QWC Services Permissions",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "title": "JSON Schema",
+      "description": "Reference to JSON schema of these permissions",
+      "type": "string",
+      "format": "uri",
+      "default": "https://raw.githubusercontent.com/qwc-services/qwc-services-core/master/schemas/qwc-services-permissions.json"
+    },
+    "users": {
+      "title": "Users",
+      "type": "array",
+      "items": {      
+        "title": "User",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "User name",
+            "type": "string"
+          },
+          "groups": {
+            "title": "Group memberships",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "roles": {
+            "title": "Role memberships",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "groups"
+        ]
+      }
+    },
+    "groups": {
+      "title": "Groups",
+      "type": "array",
+      "items": {      
+        "title": "Group",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Group name",
+            "type": "string"
+          },
+          "roles": {
+            "title": "Role memberships",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "roles"
+        ]
+      }
+    },
+    "roles": {
+      "title": "Roles",
+      "type": "array",
+      "items": {
+        "title": "Role",
+        "type": "object",
+        "properties": {
+          "role": {
+            "description": "Role name",
+            "type": "string"
+          },
+          "permissions": {
+            "title": "Permissions for role",
+            "type": "object",
+            "properties": {
+              "wms_services": { "$ref": "#/definitions/wms_services" },
+              "wfs_services": { "$ref": "#/definitions/wfs_services" },
+              "background_layers": { "$ref": "#/definitions/background_layers" },
+              "data_datasets": { "$ref": "#/definitions/data_datasets" },
+              "viewer_tasks": { "$ref": "#/definitions/viewer_tasks" },
+              "dataproducts": { "$ref": "#/definitions/dataproducts" },
+              "document_templates": { "$ref": "#/definitions/document_templates" },
+              "search_providers": { "$ref": "#/definitions/search_providers" },
+              "solr_facets": { "$ref": "#/definitions/solr_facets" }
+            }
+          }
+        },
+        "required": [
+          "role"
+        ]
+      }
+    }
+  },
+  "required": [
+    "users",
+    "groups",
+    "roles"
+  ],
+  "definitions": {
+    "wms_services": {
+      "title": "WMS services",
+      "description": "Permitted WMS services and layers for all QWC services using WMS requests (i.e. OGC, FeatureInfo, Legend, Print service)",
+      "type": "array",
+      "items": {
+        "title": "WMS permissions",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "WMS service name",
+            "type": "string"
+          },
+          "layers": {
+            "description": "Flat list of permitted layers and group layers",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "WMS layer name",
+                  "type": "string"
+                },
+                "attributes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "info_template": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          },
+          "print_templates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "layers"
+        ]
+      }
+    },
+    "wfs_services": {
+      "title": "WFS services",
+      "description": "Permitted WFS services and layers for OGC service",
+      "type": "array",
+      "items": {
+        "title": "WFS permissions",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "WFS service name",
+            "type": "string"
+          },
+          "layers": {
+            "description": "List of permitted layers",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "WFS layer name",
+                  "type": "string"
+                },
+                "attributes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "layers"
+        ]
+      }
+    },
+    "background_layers": {
+      "title": "Background layers",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "data_datasets": {
+      "title": "Data service datasets",
+      "description": "Permitted datasets for Data service",
+      "type": "array",
+      "items": {
+        "title": "Dataset permissions",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Dataset name",
+            "type": "string"
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "writable": {
+            "type": "boolean"
+          },
+          "creatable": {
+            "type": "boolean"
+          },
+          "readable": {
+            "type": "boolean"
+          },
+          "updatable": {
+            "type": "boolean"
+          },
+          "deletable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "attributes"
+        ]
+      }
+    },
+    "viewer_tasks": {
+      "title": "Viewer tasks",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dataproducts": {
+      "title": "Dataproduct service datasets",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "document_templates": {
+      "title": "Document service templates",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "search_providers": {
+      "title": "Search providers",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "solr_facets": {
+      "title": "Solr search facets",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
