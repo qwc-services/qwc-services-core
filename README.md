@@ -201,160 +201,17 @@ An existing ConfigDB can be updated to the latest schema by running the database
 The QWC Services are generally configured using environment variables.
 These can be set when running the services locally or in `docker-compose.yml` when using Docker.
 
+Common configuration:
+
+ENV                   | default value      | description
+----------------------|--------------------|---------
+`CONFIG_PATH`         | .                  | Base path for service configuration files
+`JWT_SECRET_KEY`      | `********`         | secret key for JWT token
+`TENANT_URL_RE`       | None               | Regex for tenant extraction from base URL. Example: ^https?://.+?/(.+?)/
+`TENANT_ARG`          | None               | Argument name for tenant extraction from URL arguments. Example: tenant
+
+
 See READMEs of services for details.
-
-
-#### [Map Viewer](https://github.com/qwc-services/qwc-map-viewer#configuration)
-
-ENV                                     | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`JWT_SECRET_KEY`                        | `********`                            | secret key for JWT token (same for all services) 
-`CONFIG_SERVICE_URL`                    | `http://localhost:5010/`              | QWC Config service URL
-`OGC_SERVICE_URL`                       | `http://localhost:5013/`              | QWC OGC service URL or QGIS server URL
-`DATA_SERVICE_URL`                      | `http://localhost:5012/`              | QWC Data service URL
-
-
-ENV (optional)                          | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`QWC2_PATH`                             | `qwc2/`                               | QWC2 files path
-`QWC2_CONFIG`                           | `$QWC2_PATH/config.json`              | QWC2 `config.json` path
-`QWC2_VIEWERS_PATH`                     | `$QWC2_PATH/viewers/`                 | QWC2 custom viewers path
-`CONFIG_CHECK_INTERVAL`                 | `60`s                                 | check if config cache is valid every x seconds
-`DEFAULT_CONFIG_CACHE_DURATION`         | `86400`s (24h)                        | time in seconds until config cache expiry
-`ORIGIN_CONFIG`                         | `{"host": {"_intern_": "^127.0.0.1(:\\\\d+)?$"}}` | origin detection rules
-`AUTH_SERVICES_CONFIG`                  | `{}`                                  | auth service lookups
-`AUTH_SERVICE_URL`                      | from `config.json`                    | QWC Authorization service URL
-`DOCUMENT_SERVICE_URL`                  | from `config.json`                    | QWC Document service URL
-`ELEVATION_SERVICE_URL`                 | from `config.json`                    | QWC Elevation service URL
-`INFO_SERVICE_URL`                      | from `config.json`                    | QWC Feature Info proxy service URL
-`LEGEND_SERVICE_URL`                    | from `config.json`                    | QWC Data service URL
-`MAPINFO_SERVICE_URL`                   | from `config.json`                    | QWC Map Info service URL
-`PERMALINK_SERVICE_URL`                 | from `config.json`                    | QWC Permalink service URL
-`PRINT_SERVICE_URL`                     | from `config.json`                    | QWC Print service URL
-`SEARCH_SERVICE_URL`                    | from `config.json`                    | QWC Search service URL
-
-
-[Custom viewer configurations](https://github.com/qwc-services/qwc-map-viewer#custom-viewer-configurations) can be added by placing a `<viewer>.json`, `<viewer>_qwc.json` and/or `<viewer>.html` for each custom viewer into the `$QWC2_VIEWERS_PATH` directory. The custom viewers can be opened by appending the viewer name to the base URL: `http://localhost:8088/<viewer>/`.
-
-
-#### [Admin GUI](https://github.com/qwc-services/qwc-admin-gui#configuration)
-
-ENV                                     | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`JWT_SECRET_KEY`                        | `********`                            | secret key for JWT token (same for all services) 
-
-
-ENV (optional)                          | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`USER_INFO_FIELDS`                      | `[]`                                  | custom user info fields JSON 
-`TOTP_ENABLED`                          | `False`                               | show field for TOTP secret in user form
-`GROUP_REGISTRATION_ENABLED`            | `True`                                | show GUI for registrable groups and group registration requests
-`DEFAULT_LOCALE`                        | `en`                                  | set locale for notification mails
-`MAIL_SERVER`                           | `localhost`                           | [Flask-Mail](https://pythonhosted.org/Flask-Mail/) options (for sending notifications)
-`MAIL_PORT`                             | `25`                                  | "
-`MAIL_USE_TLS`                          | `False`                               | "
-`MAIL_USE_SSL`                          | `False`                               | "
-`MAIL_DEBUG`                            | `app.debug`                           | "
-`MAIL_USERNAME`                         | `None`                                | "
-`MAIL_PASSWORD`                         | `None`                                | "
-`MAIL_DEFAULT_SENDER`                   | `None`                                | "
-`MAIL_MAX_EMAILS`                       | `None`                                | "
-`MAIL_SUPPRESS_SEND`                    | `app.testing`                         | "
-`MAIL_ASCII_ATTACHMENTS`                | `False`                               | "
-`PROXY_TIMEOUT`                         | `60`s                                 | Timeout in seconds for proxy requests to internal services
-`PROXY_URL_WHITELIST`                   | `[]`                                  | JSON list of whitelisted URLs for proxy requests to internal services
-
-
-#### [Registration GUI](https://github.com/qwc-services/qwc-registration-gui#configuration)
-
-ENV                                     | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`JWT_SECRET_KEY`                        | `********`                            | secret key for JWT token (same for all services) 
-
-
-ENV (optional)                          | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`ADMIN_RECIPIENTS`                      | `None`                                | comma separated list of admin users who should be notified of new registration requests
-`DEFAULT_LOCALE`                        | `en`                                  | set locale for application form and notification mails
-`MAIL_SERVER`                           | `localhost`                           | [Flask-Mail](https://pythonhosted.org/Flask-Mail/) options (for sending notifications)
-`MAIL_PORT`                             | `25`                                  | "
-`MAIL_USE_TLS`                          | `False`                               | "
-`MAIL_USE_SSL`                          | `False`                               | "
-`MAIL_DEBUG`                            | `app.debug`                           | "
-`MAIL_USERNAME`                         | `None`                                | "
-`MAIL_PASSWORD`                         | `None`                                | "
-`MAIL_DEFAULT_SENDER`                   | `None`                                | "
-`MAIL_MAX_EMAILS`                       | `None`                                | "
-`MAIL_SUPPRESS_SEND`                    | `app.testing`                         | "
-`MAIL_ASCII_ATTACHMENTS`                | `False`                               | "
-
-
-#### [Config service](https://github.com/qwc-services/qwc-config-service#configuration)
-
-ENV                                     | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`QGIS_SERVER_URL`                       | `http://localhost:8001/ows/`          | QGIS server URL
-`QGIS_RESOURCES_PATH`                   | `qgs/`                                | QGIS project files path
-`QWC2_PATH`                             | `qwc2/`                               | QWC2 files path
-`QWC2_THEMES_CONFIG`                    | `$QWC2_PATH/themesConfig.json`        | QWC2 `themesConfig.json` path
-`QWC2_VIEWERS_PATH`                     | `$QWC2_PATH/viewers/`                 | QWC2 custom viewers path
-`DEFAULT_ALLOW`                         | `True`                                | set whether some resources are permitted or restricted by default (see [Permissions](#permissions))
-
-
-#### [OGC service](https://github.com/qwc-services/qwc-ogc-service#usage)
-
-ENV                                     | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`JWT_SECRET_KEY`                        | `********`                            | secret key for JWT token (same for all services) 
-`QGIS_SERVER_URL`                       | `http://localhost:8001/ows/`          | QGIS server URL
-`CONFIG_SERVICE_URL`                    | `http://localhost:5010/`              | QWC Config service URL
-
-
-ENV (optional)                          | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`CONFIG_CHECK_INTERVAL`                 | `60`s                                 | check if config cache is valid every x seconds
-`DEFAULT_CONFIG_CACHE_DURATION`         | `86400`s (24h)                        | time in seconds until config cache expiry
-
-
-#### [Data service](https://github.com/qwc-services/qwc-data-service#usage)
-
-ENV                                     | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`JWT_SECRET_KEY`                        | `********`                            | secret key for JWT token (same for all services) 
-`CONFIG_SERVICE_URL`                    | `http://localhost:5010/`              | QWC Config service URL
-
-
-ENV (optional)                          | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`CONFIG_CHECK_INTERVAL`                 | `60`s                                 | check if config cache is valid every x seconds
-`DEFAULT_CONFIG_CACHE_DURATION`         | `86400`s (24h)                        | time in seconds until config cache expiry
-
-
-#### [Authentication service with local user database](https://github.com/qwc-services/qwc-db-auth#configuration)
-
-ENV                                     | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`JWT_SECRET_KEY`                        | `********`                            | secret key for JWT token (same for all services) 
-
-
-ENV (optional)                          | default value                         | description
-----------------------------------------|---------------------------------------|---------
-`MAX_LOGIN_ATTEMPTS`                    | `20`                                  | maximum number of 
-failed login attempts before sign in is blocked for an user
-`POST_PARAM_LOGIN`                      | `False`                               | activate (insecure) plain POST login
-`TOTP_ENABLED`                          | `False`                               | enable two factor authentication using TOTP
-`TOTP_ISSUER_NAME`                      | `QWC Services`                        | issuer name for TOTP QR code
-`MAIL_SERVER`                           | `localhost`                           | [Flask-Mail](https://pythonhosted.org/Flask-Mail/) options (for sending password recovery instructions)
-`MAIL_PORT`                             | `25`                                  | "
-`MAIL_USE_TLS`                          | `False`                               | "
-`MAIL_USE_SSL`                          | `False`                               | "
-`MAIL_DEBUG`                            | `app.debug`                           | "
-`MAIL_USERNAME`                         | `None`                                | "
-`MAIL_PASSWORD`                         | `None`                                | "
-`MAIL_DEFAULT_SENDER`                   | `None`                                | "
-`MAIL_MAX_EMAILS`                       | `None`                                | "
-`MAIL_SUPPRESS_SEND`                    | `app.testing`                         | "
-`MAIL_ASCII_ATTACHMENTS`                | `False`                               | "
 
 
 Resources and Permissions

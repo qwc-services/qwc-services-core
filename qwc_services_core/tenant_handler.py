@@ -21,6 +21,7 @@ class TenantHandler:
         """
         self.logger = logger
         self.tenant_name = os.environ.get('QWC_TENANT')
+        self.tenant_arg = os.environ.get('TENANT_ARG')
         self.tenant_url_re = os.environ.get('TENANT_URL_RE')
         if self.tenant_url_re:
             self.tenant_url_re = re.compile(self.tenant_url_re)
@@ -32,6 +33,8 @@ class TenantHandler:
     def tenant(self):
         if self.tenant_name:
             return self.tenant_name
+        if self.tenant_arg:
+            return request.args.get(self.tenant_arg, DEFAULT_TENANT)
         if self.tenant_url_re:
             # self.logger.debug("Extracting tenant from base_url %s" %
             #                   request.base_url)
