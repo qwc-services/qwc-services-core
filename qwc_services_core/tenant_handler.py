@@ -103,3 +103,19 @@ class TenantHandler:
                     last_config_update = timestamp
 
         return last_config_update
+
+
+class TenantPrefixMiddleware:
+    def __init__(self, app, header, ignore_default=False):
+        self.app = app
+        self.header = 'HTTP_' + header.upper()
+        self.ignore_default = ignore_default
+
+    def __call__(self, environ, start_response):
+        tenant = environ.get(self.header)
+        if tenant:
+            if not self.ignore_default or tenant != DEFAULT_TENANT:
+                prefix = '/'+environ.get(self.header)
+                environ['SCRIPT_NAME'] = prefix + environ.get(
+                    'SCRIPT_NAME', '')
+        return self.app(environ, start_response)
