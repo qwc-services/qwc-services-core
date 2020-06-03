@@ -208,7 +208,7 @@ ENV                   | default value      | description
 `CONFIG_PATH`         | .                  | Base path for service configuration files
 `JWT_SECRET_KEY`      | `********`         | secret key for JWT token
 `TENANT_URL_RE`       | None               | Regex for tenant extraction from base URL. Example: ^https?://.+?/(.+?)/
-`TENANT_ARG`          | None               | Argument name for tenant extraction from URL arguments. Example: tenant
+`TENANT_HEADER`       | None               | Tenant Header name. Example: X-tenant
 
 
 See READMEs of services for details.

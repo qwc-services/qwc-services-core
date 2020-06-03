@@ -21,20 +21,17 @@ class TenantHandler:
         """
         self.logger = logger
         self.tenant_name = os.environ.get('QWC_TENANT')
-        self.tenant_arg = os.environ.get('TENANT_ARG')
+        self.tenant_header = os.environ.get('TENANT_HEADER')
         self.tenant_url_re = os.environ.get('TENANT_URL_RE')
         if self.tenant_url_re:
             self.tenant_url_re = re.compile(self.tenant_url_re)
-        self.tenant_referrer_re = os.environ.get('TENANT_REFERRER_RE')
-        if self.tenant_referrer_re:
-            self.tenant_referrer_re = re.compile(self.tenant_referrer_re)
         self.handler_cache = {}  # handler_cache[handler_name][tenant]
 
     def tenant(self):
         if self.tenant_name:
             return self.tenant_name
-        if self.tenant_arg:
-            return request.args.get(self.tenant_arg, DEFAULT_TENANT)
+        if self.tenant_header:
+            return request.headers.get(self.tenant_header, DEFAULT_TENANT)
         if self.tenant_url_re:
             # self.logger.debug("Extracting tenant from base_url %s" %
             #                   request.base_url)
@@ -43,12 +40,6 @@ class TenantHandler:
                 return match.group(1)
             else:
                 return DEFAULT_TENANT
-        if self.tenant_referrer_re and request.referrer:
-            # self.logger.debug("Extracting tenant from referrer URL %s" %
-            #                   request.referrer)
-            match = self.tenant_referrer_re.match(request.referrer)
-            if match:
-                return match.group(1)
         return DEFAULT_TENANT
 
     def handler(self, service_name, handler_name, tenant):
