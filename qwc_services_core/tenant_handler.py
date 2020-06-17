@@ -115,7 +115,7 @@ class TenantPrefixMiddleware:
         tenant = environ.get(self.header)
         if tenant:
             if not self.ignore_default or tenant != DEFAULT_TENANT:
-                prefix = '/'+environ.get(self.header)
+                prefix = '/'+tenant
                 environ['SCRIPT_NAME'] = prefix + environ.get(
                     'SCRIPT_NAME', '')
         return self.app(environ, start_response)
