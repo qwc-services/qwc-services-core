@@ -1,7 +1,7 @@
-from flask_restplus import Api as BaseApi
+from flask_restx import Api as BaseApi
 from collections import OrderedDict
 from werkzeug.datastructures import MultiDict
-from flask_restplus.reqparse import Argument
+from flask_restx.reqparse import Argument
 
 
 class Api(BaseApi):
@@ -33,7 +33,7 @@ class Api(BaseApi):
 def create_model(api, name, fields):
     """Helper for creating api models with ordered fields
 
-    :param flask_restplus.Api api: Flask-RESTPlus Api object
+    :param flask_restx.Api api: Flask-RESTX Api object
     :param str name: Model name
     :param list fields: List of tuples containing ['field name', <type>]
     """
