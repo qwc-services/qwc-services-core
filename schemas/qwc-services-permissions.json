@@ -88,6 +88,8 @@
               "background_layers": { "$ref": "#/definitions/background_layers" },
               "data_datasets": { "$ref": "#/definitions/data_datasets" },
               "viewer_tasks": { "$ref": "#/definitions/viewer_tasks" },
+              "theme_info_links": { "$ref": "#/definitions/theme_info_links" },
+              "plugin_data": { "$ref": "#/definitions/plugin_data" },
               "dataproducts": { "$ref": "#/definitions/dataproducts" },
               "document_templates": { "$ref": "#/definitions/document_templates" },
               "search_providers": { "$ref": "#/definitions/search_providers" },
@@ -250,6 +252,39 @@
       "type": "array",
       "items": {
         "type": "string"
+      }
+    },
+    "theme_info_links": {
+      "title": "Theme info links",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "plugin_data": {
+      "title": "Plugin data",
+      "description": "Permitted resources for custom Map viewer plugins",
+      "type": "array",
+      "items": {
+        "title": "Plugin permissions",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Plugin name",
+            "type": "string"
+          },
+          "resources": {
+            "description": "Plugin specific resources",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "resources"
+        ]
       }
     },
     "dataproducts": {
