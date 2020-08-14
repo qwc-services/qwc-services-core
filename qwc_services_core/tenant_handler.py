@@ -42,6 +42,16 @@ class TenantHandler:
                 return DEFAULT_TENANT
         return DEFAULT_TENANT
 
+    def tenant_prefix(self):
+        """URL prefix for tentant"""
+        tenant = self.tenant()
+        if tenant == DEFAULT_TENANT:
+            # We should maybe support a custom base prefix
+            return '/'
+        else:
+            # TODO: we should support a custom prefix when TENANT_URL_RE is set
+            return '/' + tenant
+
     def handler(self, service_name, handler_name, tenant):
         """Get service handler for tenant.
 
