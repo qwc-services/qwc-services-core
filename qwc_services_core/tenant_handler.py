@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 import re
 from flask import request
+from flask.sessions import SecureCookieSessionInterface
 
 from .permissions_reader import PermissionsReader
 from .runtime_config import RuntimeConfig
@@ -41,16 +42,6 @@ class TenantHandler:
             else:
                 return DEFAULT_TENANT
         return DEFAULT_TENANT
-
-    def tenant_prefix(self):
-        """URL prefix for tentant"""
-        tenant = self.tenant()
-        if tenant == DEFAULT_TENANT:
-            # We should maybe support a custom base prefix
-            return '/'
-        else:
-            # TODO: we should support a custom prefix when TENANT_URL_RE is set
-            return '/' + tenant
 
     def handler(self, service_name, handler_name, tenant):
         """Get service handler for tenant.
@@ -129,3 +120,32 @@ class TenantPrefixMiddleware:
                 environ['SCRIPT_NAME'] = prefix + environ.get(
                     'SCRIPT_NAME', '')
         return self.app(environ, start_response)
+
+
+class TenantSessionInterface(SecureCookieSessionInterface):
+    def __init__(self, environ):
+        super().__init__()
+        self.tenant_name = environ.get('QWC_TENANT')
+        self.tenant_header = environ.get('TENANT_HEADER')
+        self.tenant_url_re = environ.get('TENANT_URL_RE')
+        if self.tenant_url_re:
+            self.tenant_url_re = re.compile(self.tenant_url_re)
+
+    def tenant(self):
+        if self.tenant_name:
+            return self.tenant_name
+        if self.tenant_header:
+            return request.headers.get(self.tenant_header, DEFAULT_TENANT)
+        if self.tenant_url_re:
+            match = self.tenant_url_re.match(request.base_url)
+            if match:
+                return match.group(1)
+            else:
+                return DEFAULT_TENANT
+        return DEFAULT_TENANT
+
+    def get_cookie_path(self, app):
+        prefix = '/' + self.tenant()
+        # Set config as a side effect
+        app.config['JWT_ACCESS_COOKIE_PATH'] = prefix
+        return prefix
