@@ -41,21 +41,30 @@ class RuntimeConfig:
                 "Could not load runtime config '%s':\n%s" %
                 (runtime_config_path, e)
             )
-            raise e
-        # TODO: validate config
+            self.config = {}
         return self
 
     def tenant_config(self, tenant):
         return self.read_config(tenant)
 
     def get(self, name, default=None):
-        val = os.environ.get(name.upper())
-        if val is None:
-            val = self.config['config'].get(name, default)
+        val = self.config.get('config', {}).get(name, default)
+        # Optional override from env var
+        envval = os.environ.get(name.upper())
+        if envval:
+            # Convert from string
+            if val is None:
+                # unkown type --> no conversion
+                val = envval
+            elif type(val) is list or type(val) is dict:
+                val = json.loads(envval)
+            else:
+                val = type(val)(envval)
+
         return val
 
     def resources(self):
-        return self.config['resources']
+        return self.config.get('resources')
 
     def resource(self, name):
-        return self.config['resources'].get(name)
+        return self.config.get('resources', {}).get(name)
