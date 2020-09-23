@@ -51,12 +51,12 @@ class RuntimeConfig:
         val = self.config.get('config', {}).get(name, default)
         # Optional override from env var
         envval = os.environ.get(name.upper())
-        if envval:
+        if envval is not None:
             # Convert from string
             if val is None:
                 # unkown type --> no conversion
                 val = envval
-            elif type(val) is list or type(val) is dict:
+            elif type(val) in (list, dict):
                 val = json.loads(envval)
             else:
                 val = type(val)(envval)
