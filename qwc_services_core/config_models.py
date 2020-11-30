@@ -11,7 +11,7 @@ class ConfigModels():
     Provide SQLAlchemy ORM models for ConfigDB queries.
     """
 
-    def __init__(self, db_engine, conn_str=None):
+    def __init__(self, db_engine, conn_str=None, extra_tables=[]):
         """Constructor
 
         :param DatabaseEngine db_engine: Database engine with DB connections
@@ -24,7 +24,7 @@ class ConfigModels():
         # init models
         self.base = None
         self.custom_models = {}
-        self.init_models()
+        self.init_models(extra_tables)
 
     def session(self):
         """Create a new session."""
@@ -41,7 +41,7 @@ class ConfigModels():
         else:
             return self.base.classes.get(name) or self.custom_models.get(name)
 
-    def init_models(self):
+    def init_models(self, extra_tables):
         """Setup SQLAlchemy ORM models."""
 
         # Generate required models from ConfigDB using automap
@@ -51,7 +51,7 @@ class ConfigModels():
             'resources', 'resource_types', 'permissions',
             'registrable_groups', 'registration_requests',
             'last_update'
-        ]
+        ] + extra_tables
 
         def table_selector(table_name, meta_data):
             return (table_name in TABLES)
