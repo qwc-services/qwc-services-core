@@ -1,4 +1,5 @@
 import os
+import re
 from flask import json, safe_join
 
 
@@ -35,7 +36,10 @@ class RuntimeConfig:
         )
         try:
             with open(runtime_config_path, encoding='utf-8') as fh:
-                self.config = json.load(fh)
+                data = fh.read()
+                # Replace env variables
+                dataout = ENVVAR_PATTERN.sub(envrepl, data)
+                self.config = json.loads(dataout)
         except Exception as e:
             self.logger.error(
                 "Could not load runtime config '%s':\n%s" %
@@ -68,3 +72,12 @@ class RuntimeConfig:
 
     def resource(self, name):
         return self.config.get('resources', {}).get(name)
+
+
+ENVVAR_PATTERN = re.compile(r'{{(\w+)}}')
+
+
+def envrepl(match):
+    name = match.group(1)
+    val = os.environ.get(name, '')
+    return val
