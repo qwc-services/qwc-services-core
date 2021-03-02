@@ -10,5 +10,5 @@ test: sdist
 	python3 -m twine upload --repository testpypi dist/*
 	echo Test with `python -m pip install --index-url https://test.pypi.org/simple/ qwc-services-core`
 
-upload: sdist
+publish: sdist
 	python3 -m twine upload dist/*
