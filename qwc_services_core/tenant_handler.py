@@ -117,7 +117,8 @@ class TenantPrefixMiddleware:
     def __init__(self, app, header, _ignored=None):
         self.app = app
         self.header = 'HTTP_' + header.upper()
-        self.service_prefix = os.environ.get('QWC_SERVICE_PREFIX', '/')
+        self.service_prefix = os.environ.get(
+            'QWC_SERVICE_PREFIX', '/').rstrip('/') + '/'
 
     def __call__(self, environ, start_response):
         tenant = environ.get(self.header)
@@ -133,7 +134,8 @@ class TenantSessionInterface(SecureCookieSessionInterface, TenantHandlerBase):
     def __init__(self, environ):
         SecureCookieSessionInterface.__init__(self)
         TenantHandlerBase.__init__(self)
-        self.service_prefix = environ.get('QWC_SERVICE_PREFIX', '/')
+        self.service_prefix = environ.get(
+            'QWC_SERVICE_PREFIX', '/').rstrip('/') + '/'
 
     def tenant_path_prefix(self):
         """Tenant path prefix /map/org1 ("$QWC_SERVICE_PREFIX/$TENANT")"""
