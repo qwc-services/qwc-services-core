@@ -74,7 +74,7 @@ class RuntimeConfig:
         return self.config.get('resources', {}).get(name)
 
 
-ENVVAR_PATTERN = re.compile(r'{{(\w+)}}')
+ENVVAR_PATTERN = re.compile(r'\$\$(\w+)\$\$')
 
 
 def envrepl(match):
