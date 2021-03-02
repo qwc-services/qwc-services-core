@@ -109,20 +109,25 @@ class PermissionsReader():
         # extract username and group
         username = None
         group = None
+        groups = []
         if identity:
             if isinstance(identity, dict):
                 username = identity.get('username')
                 group = identity.get('group')
+                groups = identity.get('groups', [])
             else:
                 # identity is username
                 username = identity
+        if group:
+            groups.append(group)
 
         # add default public role
         roles = [self.PUBLIC_ROLE_NAME]
         # add any user roles
         roles.extend(self.permissions['users'].get(username, []))
         # add any group roles
-        roles.extend(self.permissions['groups'].get(group, []))
+        for group in groups:
+            roles.extend(self.permissions['groups'].get(group, []))
 
         # return unique sorted roles
         return sorted(list(set(roles)))
