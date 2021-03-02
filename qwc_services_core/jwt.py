@@ -12,8 +12,7 @@ def jwt_manager(app, api=None):
     app.config['JWT_COOKIE_CSRF_PROTECT'] = False
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=12)
     app.config['JWT_SECRET_KEY'] = os.environ.get(
-        'JWT_SECRET_KEY',
-        'CHANGE-ME-1ef43ade8807dc37a6588cb8fb9dec4caf6dfd0e00398f9a')
+        'JWT_SECRET_KEY', os.urandom(24))
 
     jwt = JWTManager(app)
 
