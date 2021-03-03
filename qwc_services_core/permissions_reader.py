@@ -1,5 +1,6 @@
 import os
 from flask import json, safe_join
+from .auth import get_username, get_groups
 
 
 class PermissionsReader():
@@ -107,19 +108,8 @@ class PermissionsReader():
         :param obj identity: User identity
         """
         # extract username and group
-        username = None
-        group = None
-        groups = []
-        if identity:
-            if isinstance(identity, dict):
-                username = identity.get('username')
-                group = identity.get('group')
-                groups = identity.get('groups', [])
-            else:
-                # identity is username
-                username = identity
-        if group:
-            groups.append(group)
+        username = get_username(identity)
+        groups = get_groups(identity)
 
         # add default public role
         roles = [self.PUBLIC_ROLE_NAME]
