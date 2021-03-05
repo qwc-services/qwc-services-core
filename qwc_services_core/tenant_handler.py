@@ -12,8 +12,7 @@ DEFAULT_TENANT = 'default'
 
 
 class TenantHandlerBase:
-    """Tenant handler base class
-    """
+    """Tenant handler base class"""
 
     def __init__(self):
         self.tenant_name = os.environ.get('QWC_TENANT')
@@ -21,6 +20,9 @@ class TenantHandlerBase:
         self.tenant_url_re = os.environ.get('TENANT_URL_RE')
         if self.tenant_url_re:
             self.tenant_url_re = re.compile(self.tenant_url_re)
+
+    def is_multi(self):
+        return self.tenant_name or self.tenant_header or self.tenant_url_re
 
     def tenant(self):
         if self.tenant_name:
@@ -37,8 +39,7 @@ class TenantHandlerBase:
 
 
 class TenantHandler(TenantHandlerBase):
-    """Tenant handler with configuraton cache
-    """
+    """Tenant handler with configuraton cache"""
 
     def __init__(self, logger):
         """Constructor
@@ -114,6 +115,7 @@ class TenantHandler(TenantHandlerBase):
 
 class TenantPrefixMiddleware:
     """WSGI middleware injecting tenant header in path"""
+
     def __init__(self, app, _header=None, _ignore_default=None):
         self.app = app
         tenant_header = os.environ.get('TENANT_HEADER')
@@ -146,19 +148,25 @@ class TenantPrefixMiddleware:
         return self.app(environ, start_response)
 
 
-class TenantSessionInterface(SecureCookieSessionInterface):
+class TenantSessionInterface(SecureCookieSessionInterface, TenantHandlerBase):
     """Flask session handler injecting tenant in JWT cookie path"""
+
     def __init__(self, environ):
         SecureCookieSessionInterface.__init__(self)
-        self.prefix = '/'
+        TenantHandlerBase.__init__(self)
+        self.service_prefix = environ.get(
+            'QWC_SERVICE_PREFIX', '').rstrip('/') + '/'
 
-    def open_session(self, app, request):
-        # store service path prefix for cookie path
-        self.prefix = request.script_root + '/'
-        return SecureCookieSessionInterface.open_session(self, app, request)
+    def tenant_path_prefix(self):
+        """Tenant path prefix /map/org1 ("$QWC_SERVICE_PREFIX/$TENANT")"""
+        if self.is_multi():
+            return self.service_prefix + self.tenant()
+        else:
+            return self.service_prefix
 
     def get_cookie_path(self, app):
         # https://flask.palletsprojects.com/en/1.1.x/api/#flask.sessions.SessionInterface.get_cookie_path
+        prefix = self.tenant_path_prefix()
         # Set config as a side effect
-        app.config['JWT_ACCESS_COOKIE_PATH'] = self.prefix
-        return self.prefix
+        app.config['JWT_ACCESS_COOKIE_PATH'] = prefix
+        return prefix
