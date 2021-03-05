@@ -33,7 +33,7 @@ class TenantHandlerBase:
                 return match.group(1)
             else:
                 return DEFAULT_TENANT
-        return DEFAULT_TENANT
+        return ''
 
 
 class TenantHandler(TenantHandlerBase):
@@ -112,38 +112,53 @@ class TenantHandler(TenantHandlerBase):
         return last_config_update
 
 
-class TenantPrefixMiddleware:
+class TenantPrefixMiddleware(TenantHandlerBase):
     """WSGI middleware injecting tenant header in path"""
-    def __init__(self, app, header, _ignored=None):
+    def __init__(self, app, _header=None, _ignore_default=None):
+        TenantHandlerBase.__init__(self)
+        if self.tenant_header:
+            self.header = 'HTTP_' + self.tenant_header.upper()
+        else:
+            self.header = None
         self.app = app
-        self.header = 'HTTP_' + header.upper()
-        self.service_prefix = os.environ.get(
-            'QWC_SERVICE_PREFIX', '/').rstrip('/') + '/'
+
+    def middleware_tenant(self, environ):
+        if self.header:
+            return environ.get(self.header, DEFAULT_TENANT)
+        elif self.tenant_url_re:
+            # tenant already in path
+            return None
+        else:
+            return self.tenant()
 
     def __call__(self, environ, start_response):
-        tenant = environ.get(self.header)
+        # environ in request http://localhost:9090/base/pages/test.html?arg=1
+        # /base is mountpoint (e.g. via WSGIScriptAlias)
+        # 'REQUEST_URI': '/base/pages/test.html?arg=1'
+        # 'SCRIPT_NAME': '/base'
+        # 'PATH_INFO': '/pages/test.html'
+        # 'QUERY_STRING': 'arg=1'
+        # see also https://www.python.org/dev/peps/pep-3333/#environ-variables
+        tenant = self.middleware_tenant(environ)
         if tenant:
-            prefix = self.service_prefix + tenant
-            environ['SCRIPT_NAME'] = prefix + environ.get(
-                'SCRIPT_NAME', '')
+            prefix = environ.get('SCRIPT_NAME', '')
+            environ['SCRIPT_NAME'] = prefix + '/' + tenant
         return self.app(environ, start_response)
 
 
-class TenantSessionInterface(SecureCookieSessionInterface, TenantHandlerBase):
+class TenantSessionInterface(SecureCookieSessionInterface):
     """Flask session handler injecting tenant in JWT cookie path"""
     def __init__(self, environ):
         SecureCookieSessionInterface.__init__(self)
-        TenantHandlerBase.__init__(self)
-        self.service_prefix = environ.get(
-            'QWC_SERVICE_PREFIX', '/').rstrip('/') + '/'
+        self.prefix = '/'
 
-    def tenant_path_prefix(self):
-        """Tenant path prefix /map/org1 ("$QWC_SERVICE_PREFIX/$TENANT")"""
-        prefix = self.service_prefix + self.tenant()
-        return prefix
+    def open_session(self, app, request):
+        # store service path prefix for cookie path
+        self.prefix = request.script_root + '/'
+        return SecureCookieSessionInterface.open_session(self, app, request)
 
     def get_cookie_path(self, app):
-        prefix = self.tenant_path_prefix()
+        # https://flask.palletsprojects.com/en/1.1.x/api/#flask.sessions.SessionInterface.get_cookie_path
         # Set config as a side effect
-        app.config['JWT_ACCESS_COOKIE_PATH'] = prefix
-        return prefix
+        app.config['JWT_ACCESS_COOKIE_PATH'] = self.prefix
+        return self.prefix
