@@ -115,13 +115,14 @@ class TenantHandler(TenantHandlerBase):
 class TenantPrefixMiddleware:
     """WSGI middleware injecting tenant header in path"""
     def __init__(self, app, _header=None, _ignore_default=None):
-        TenantHandlerBase.__init__(self)
+        self.app = app
         tenant_header = os.environ.get('TENANT_HEADER')
         if tenant_header:
             self.header = 'HTTP_' + tenant_header.upper()
         else:
             self.header = None
-        self.app = app
+        self.service_prefix = os.environ.get(
+            'QWC_SERVICE_PREFIX', '/').rstrip('/') + '/'
 
     def request_tenant(self, environ):
         if self.header:
@@ -139,8 +140,9 @@ class TenantPrefixMiddleware:
         # see also https://www.python.org/dev/peps/pep-3333/#environ-variables
         tenant = self.request_tenant(environ)
         if tenant:
-            prefix = environ.get('SCRIPT_NAME', '')
-            environ['SCRIPT_NAME'] = prefix + '/' + tenant
+            prefix = self.service_prefix + tenant
+            environ['SCRIPT_NAME'] = prefix + environ.get(
+                'SCRIPT_NAME', '')
         return self.app(environ, start_response)
 
 
