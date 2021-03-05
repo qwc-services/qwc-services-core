@@ -33,7 +33,7 @@ class TenantHandlerBase:
                 return match.group(1)
             else:
                 return DEFAULT_TENANT
-        return ''
+        return DEFAULT_TENANT
 
 
 class TenantHandler(TenantHandlerBase):
@@ -112,24 +112,22 @@ class TenantHandler(TenantHandlerBase):
         return last_config_update
 
 
-class TenantPrefixMiddleware(TenantHandlerBase):
+class TenantPrefixMiddleware:
     """WSGI middleware injecting tenant header in path"""
     def __init__(self, app, _header=None, _ignore_default=None):
         TenantHandlerBase.__init__(self)
-        if self.tenant_header:
-            self.header = 'HTTP_' + self.tenant_header.upper()
+        tenant_header = os.environ.get('TENANT_HEADER')
+        if tenant_header:
+            self.header = 'HTTP_' + tenant_header.upper()
         else:
             self.header = None
         self.app = app
 
-    def middleware_tenant(self, environ):
+    def request_tenant(self, environ):
         if self.header:
-            return environ.get(self.header, DEFAULT_TENANT)
-        elif self.tenant_url_re:
-            # tenant already in path
-            return None
+            return environ.get(self.header)
         else:
-            return self.tenant()
+            return None
 
     def __call__(self, environ, start_response):
         # environ in request http://localhost:9090/base/pages/test.html?arg=1
@@ -139,7 +137,7 @@ class TenantPrefixMiddleware(TenantHandlerBase):
         # 'PATH_INFO': '/pages/test.html'
         # 'QUERY_STRING': 'arg=1'
         # see also https://www.python.org/dev/peps/pep-3333/#environ-variables
-        tenant = self.middleware_tenant(environ)
+        tenant = self.request_tenant(environ)
         if tenant:
             prefix = environ.get('SCRIPT_NAME', '')
             environ['SCRIPT_NAME'] = prefix + '/' + tenant
