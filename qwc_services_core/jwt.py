@@ -5,12 +5,14 @@ from flask import make_response
 
 
 def jwt_manager(app, api=None):
-    """Setup the Flask-JWT-Extended extension"""
-    # http://flask-jwt-extended.readthedocs.io/en/latest/options.html
+    """Setup Flask-JWT-Extended extension for services
+       with authenticated access"""
+    # https://flask-jwt-extended.readthedocs.io/en/stable/options
     app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
-    app.config['JWT_COOKIE_SECURE'] = False
-    app.config['JWT_COOKIE_CSRF_PROTECT'] = False
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=12)
+    app.config['JWT_ACCESS_COOKIE_NAME'] = os.environ.get(
+        'JWT_ACCESS_COOKIE_NAME', 'access_token_cookie')
+    app.config['JWT_COOKIE_CSRF_PROTECT'] = bool(os.environ.get(
+        'JWT_COOKIE_CSRF_PROTECT', False))
     app.config['JWT_SECRET_KEY'] = os.environ.get(
         'JWT_SECRET_KEY', os.urandom(24))
 
