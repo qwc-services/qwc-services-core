@@ -1,0 +1,204 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/qwc-services/qwc-services-core/raw/master/schemas/qwc-services-unified-permissions.json",
+  "title": "QWC Services unified Permissions",
+  "description": "Unified and simplified permissions if resource permissions are identical in all QWC Services",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "title": "JSON Schema",
+      "description": "Reference to JSON schema of these permissions",
+      "type": "string",
+      "format": "uri",
+      "default": "https://github.com/qwc-services/qwc-services-core/raw/master/schemas/qwc-services-unified-permissions.json"
+    },
+    "users": {
+      "title": "Users",
+      "type": "array",
+      "items": {      
+        "title": "User",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "User name",
+            "type": "string"
+          },
+          "groups": {
+            "title": "Group memberships",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "roles": {
+            "title": "Role memberships",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "groups"
+        ]
+      }
+    },
+    "groups": {
+      "title": "Groups",
+      "type": "array",
+      "items": {      
+        "title": "Group",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Group name",
+            "type": "string"
+          },
+          "roles": {
+            "title": "Role memberships",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "roles"
+        ]
+      }
+    },
+    "roles": {
+      "title": "Roles",
+      "type": "array",
+      "items": {
+        "title": "Role",
+        "type": "object",
+        "properties": {
+          "role": {
+            "description": "Role name",
+            "type": "string"
+          },
+          "permissions": {
+            "title": "Permissions for role",
+            "type": "object",
+            "properties": {
+              "all_services": {
+                "description": "Permitted resources for all services (top-level permitted layers and group layers, datasets with write permissions, document templates)",
+                "type": "array",
+                "items": {
+                  "title": "Resource permissions",
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "description": "Dataproduct reference or document template name",
+                      "type": "string"
+                    },
+                    "writable": {
+                      "description": "Writable flag for datasets with write permissions",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "all_services"
+            ]
+          }
+        },
+        "required": [
+          "role"
+        ]
+      }
+    },
+    "wms_name": {
+      "description": "Name of WMS service and its root layer",
+      "type": "string"
+    },
+    "wfs_name": {
+      "description": "WFS service name",
+      "type": "string"
+    },
+    "dataproducts": {
+      "title": "Dataproducts",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {"$ref": "#/definitions/layer"},
+          {"$ref": "#/definitions/group_layer"}
+        ]
+      }
+    },
+    "common_resources": {
+      "description": "Additional resources with no restrictions (internal print layers, background layers, print templates, default solr facets)",
+      "type": "array",
+      "items": {
+        "description": "Resource name",
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "users",
+    "groups",
+    "roles",
+    "wms_name",
+    "wfs_name",
+    "dataproducts",
+    "common_resources"
+  ],
+  "definitions": {
+    "layer": {
+      "title": "Layer",
+      "description": "Single layer",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Layer name",
+          "type": "string"
+        },
+        "attributes": {
+          "description": "List of attributes, excluding 'geometry'",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "attributes"
+      ],
+      "additionalProperties": false
+    },
+    "group_layer": {
+      "title": "Group Layer",
+      "description": "Group layer with sublayers",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Group layer name",
+          "type": "string"
+        },
+        "sublayers": {
+          "description": "List of sublayer references",
+          "type": "array",
+          "items": {
+            "description": "Sublayer identifier",
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "sublayers"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

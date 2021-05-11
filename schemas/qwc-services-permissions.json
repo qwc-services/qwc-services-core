@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/qwc-services/qwc-services-core/master/schemas/qwc-services-permissions.json",
+  "$id": "https://github.com/qwc-services/qwc-services-core/raw/master/schemas/qwc-services-permissions.json",
   "title": "QWC Services Permissions",
   "type": "object",
   "properties": {
@@ -9,7 +9,7 @@
       "description": "Reference to JSON schema of these permissions",
       "type": "string",
       "format": "uri",
-      "default": "https://raw.githubusercontent.com/qwc-services/qwc-services-core/master/schemas/qwc-services-permissions.json"
+      "default": "https://github.com/qwc-services/qwc-services-core/raw/master/schemas/qwc-services-permissions.json"
     },
     "users": {
       "title": "Users",
