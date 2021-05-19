@@ -25,14 +25,20 @@
           },
           "groups": {
             "title": "Group memberships",
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
           "roles": {
             "title": "Role memberships",
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
@@ -57,7 +63,10 @@
           },
           "roles": {
             "title": "Role memberships",
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
@@ -135,7 +144,7 @@
       }
     },
     "common_resources": {
-      "description": "Additional resources with no restrictions (internal print layers, background layers, print templates, default solr facets)",
+      "description": "Additional resources with no restrictions (internal print layers, background layers, print templates, default Solr facets)",
       "type": "array",
       "items": {
         "description": "Resource name",

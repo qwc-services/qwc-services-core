@@ -87,17 +87,17 @@ class PermissionsReader():
         # collect group roles
         groups = {}
         for group in permissions.get('groups', []):
-            groups[group['name']] = group['roles']
+            groups[group['name']] = group['roles'] or []
 
         # collect user roles
         users = {}
         for user in permissions.get('users', []):
             user_roles = []
             # direct roles
-            for role in user['roles']:
+            for role in user.get('roles', []) or []:
                 user_roles.append(role)
             # roles from groups
-            for group in user['groups']:
+            for group in user['groups'] or []:
                 user_roles.extend(groups.get(group, []))
             # assign unique sorted roles
             users[user['name']] = sorted(list(set(user_roles)))
