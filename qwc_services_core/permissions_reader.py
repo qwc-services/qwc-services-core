@@ -1,4 +1,6 @@
+from copy import deepcopy
 import os
+
 from flask import json, safe_join
 from .auth import get_username, get_groups
 
@@ -71,6 +73,17 @@ class PermissionsReader():
 
         # transform raw permissions to lookup dict
 
+        # detect permissions schema type
+        is_unified = (
+            'dataproducts' in permissions and 'common_resources' in permissions
+        )
+
+        resources_lookup = {}
+        if is_unified:
+            # create lookup for resources
+            for resource in permissions.get('dataproducts', []):
+                resources_lookup[resource.get('name')] = resource
+
         # collect group roles
         groups = {}
         for group in permissions.get('groups', []):
@@ -92,13 +105,171 @@ class PermissionsReader():
         # collect role permissions
         roles = {}
         for role in permissions.get('roles', []):
-            roles[role['role']] = role['permissions']
+            if not is_unified:
+                roles[role['role']] = role['permissions']
+            else:
+                roles[role['role']] = self.expand_unified_permissions(
+                    role['permissions'], deepcopy(resources_lookup), permissions
+                )
 
         return {
             'users': users,
             'groups': groups,
             'roles': roles
         }
+
+    def expand_unified_permissions(self, role_permissions, resources_lookup,
+                                   permissions):
+        """Return full resource permissions expanded from unified permissions.
+
+        :param obj role_permissions: Unified permissions for role
+        :param obj resources_lookup: Lookup for resources with sublayers or
+                                     attributes
+        :param obj permissions: Permissions from JSON
+        """
+        full_permissions = {}
+
+        wms_name = permissions.get('wms_name', '')
+        wfs_name = permissions.get('wfs_name', '')
+        # common resources for internal print layers, background layers,
+        #   print templates and default solr facets
+        common_resources = permissions.get('common_resources', [])
+
+        wms_layers = []
+        # add WMS root layer
+        wms_layers.append({
+            'name': wms_name
+        })
+        wfs_layers = []
+        data_datasets = []
+        dataproducts = []
+        dataproducts.append(wms_name)
+        document_templates = []
+        solr_facets = []
+
+        # copy writable flags from all_services to resources_lookup
+        for resource in role_permissions.get('all_services', []):
+            if 'writable' in resource:
+                lookup = resources_lookup.get(resource['name'], {})
+                lookup['writable'] = resource['writable']
+
+        # collect permitted resources for role
+        role_resources = self.collect_resources(
+            role_permissions.get('all_services', []), resources_lookup
+        )
+
+        # expand to full QWC service permissions
+        # NOTE: This generates more permissions than there are actual resources
+        #       in a specific service. Any surplus permissions will be ignored.
+        for resource in role_resources:
+            if 'attributes' in resource:
+                # single layer
+
+                # add default 'geometry' column to WMS/WFS attributes
+                ogc_attributes = resource['attributes'] + ['geometry']
+
+                # add potential WMS layer
+                wms_layers.append({
+                    'name': resource['name'],
+                    'attributes': ogc_attributes,
+                    # NOTE: any info templates are always permitted
+                    'info_template': True
+                })
+
+                # add potential WFS layer
+                wfs_layers.append({
+                    'name': resource['name'],
+                    'attributes': ogc_attributes
+                })
+
+                # add potential Data service dataset
+                data_datasets.append({
+                    'name': resource['name'],
+                    # NOTE: attributes without geometry column
+                    'attributes': resource['attributes'],
+                    'writable': resource.get('writable', False),
+                    # NOTE: always readable
+                    'readable': True
+                })
+
+                # add potential Solr facet
+                solr_facets.append(resource['name'])
+            else:
+                # add potential group layer to WMS
+                wms_layers.append({
+                    'name': resource['name']
+                })
+
+            dataproducts.append(resource['name'])
+
+            if list(resource.keys()) == ['name']:
+                # potential document template has no keys except 'name'
+                document_templates.append(resource['name'])
+
+        # add potential internal print layers to WMS
+        wms_layers += [
+            {'name': name} for name in common_resources
+        ]
+
+        # NOTE: assume single WMS service
+        full_permissions['wms_services'] = [{
+            'name': wms_name,
+            'layers': wms_layers,
+            # add potential print templates
+            'print_templates': common_resources
+        }]
+
+        # NOTE: assume single WFS service
+        full_permissions['wfs_services'] = [{
+            'name': wfs_name,
+            'layers': wfs_layers
+        }]
+
+        full_permissions['background_layers'] = common_resources
+        full_permissions['data_datasets'] = data_datasets
+        full_permissions['dataproducts'] = dataproducts
+        full_permissions['document_templates'] = document_templates
+
+        # add potential default Solr facets
+        solr_facets += common_resources
+        full_permissions['solr_facets'] = solr_facets
+
+        return full_permissions
+
+    def collect_resources(self, parent_resources, resources_lookup):
+        """Recursively collect resources from 'all_services' and return
+        flat list of permitted resources.
+
+        :param list<obj> parent_resources: Parent resources
+        :param obj resources_lookup: Lookup for resources with sublayers or
+                                     attributes
+        """
+        resources = []
+
+        for resource in parent_resources:
+            # merge with any resource from lookup
+            lookup = resources_lookup.get(resource['name'], {})
+            resource.update(lookup)
+
+            if 'processed' not in lookup:
+                # add resource
+                resources.append(resource)
+                # mark lookup as processed to skip duplicates
+                lookup['processed'] = True
+            else:
+                # skip duplicates
+                continue
+
+            if 'sublayers' in resource:
+                # recursively collect sublayers
+                sub_resources = [
+                    {'name': name} for name in resource['sublayers']
+                ]
+                resources += self.collect_resources(
+                    sub_resources, resources_lookup
+                )
+
+        return resources
 
     # helpers
 
