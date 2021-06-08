@@ -37,10 +37,15 @@ Applications:
 * [Registration GUI](https://github.com/qwc-services/qwc-registration-gui)
 
 REST services:
-* [Config service](https://github.com/qwc-services/qwc-config-service)
+* [Authentication service with local user database](https://github.com/qwc-services/qwc-db-auth)
 * [OGC service](https://github.com/qwc-services/qwc-ogc-service)
 * [Data service](https://github.com/qwc-services/qwc-data-service)
-* [Authentication service with local user database](https://github.com/qwc-services/qwc-db-auth)
+* [Permalink service](https://github.com/qwc-services/qwc-permalink-service)
+* [Elevation service](https://github.com/qwc-services/qwc-elevation-service)
+* [Mapinfo service](https://github.com/qwc-services/qwc-mapinfo-service)
+* [Document service](https://github.com/qwc-services/qwc-document-service)
+* [Print service](https://github.com/qwc-services/qwc-print-service)
+* [Fulltext search service](https://github.com/qwc-services/qwc-fulltext-search-service)
 
 Configuration database:
 * [DB schema and migrations](https://github.com/qwc-services/qwc-config-db)
@@ -67,8 +72,72 @@ Install Docker and setup containers (see [qwc-docker README](https://github.com/
 
     cd qwc-docker/
     cp docker-compose-example.yml docker-compose.yml
-    cp volumes/qwc2/themesConfig-example.json volumes/qwc2/themesConfig.json
-    docker-compose build
+
+Create a secret key:
+
+    python3 -c 'import secrets; print("JWT_SECRET_KEY=\"%s\"" % secrets.token_hex(48))' >.env
+
+Set permissions for writable volumes:
+
+    sudo chown -R www-data:www-data volumes/qgs-resources
+    sudo chown -R www-data:www-data demo-config
+    sudo chown -R www-data:www-data volumes/qwc2/assets
+
+    sudo chown 8983:8983 volumes/solr/data
+
+### Run containers
+
+Start all containers:
+
+    docker-compose up -d
+
+Follow log output:
+
+    docker-compose logs -f
+
+Open map viewer:
+
+    http://localhost:8088/
+
+Open Admin GUI (Admin user: `admin:admin`, requires password change on first login):
+
+    http://localhost:8088/qwc_admin
+
+Sign in (Demo user: `demo:demo`):
+
+    http://localhost:8088/auth/login
+
+Sign out:
+
+    http://localhost:8088/auth/logout
+
+Stop all containers:
+
+    docker-compose down
+
+### Add a QGIS project
+
+* Copy project to `volumes/config-in/default/qgis_projects/`
+* Update configuration in Admin GUI
+
+### Add an editable layer
+
+* Add layer in QGIS project
+* Add map and data resources with permissions
+
+### Add a custom edit form
+
+Use the previously generated edit form as a template.
+
+Edit and save the form with QT Designer.
+
+Copy the form into the volumes:
+
+    sudo cp natural-earth-countries_edit_polygons.ui volumes/config-in/default/qgis_projects/
+    sudo cp natural-earth-countries_edit_polygons.ui volumes/qgs-resources/
+
+
+### Customize QWC2 Viewer
 
 Clone and build QWC2 Demo App (see [Quick start](https://github.com/qgis/qwc2-demo-app/blob/master/doc/QWC2_Documentation.md#quick-start)) (or use your custom QWC2 build):
 
@@ -101,33 +170,7 @@ Copy QWC2 files from a build:
       config.json > $DSTDIR/qwc2/config.json && \
     cd -
 
-Start all containers:
-
-    docker-compose up -d
-
-Follow log output:
-
-    docker-compose logs -f
-
-Open map viewer:
-
-    http://localhost:8088/
-
-Open Admin GUI (Admin user: `admin:admin`, requires password change on first login):
-
-    http://localhost:8088/qwc_admin
-
-Sign in (Demo user: `demo:demo`):
-
-    http://localhost:8088/auth/login
-
-Sign out:
-
-    http://localhost:8088/auth/logout
-
-Stop all containers:
-
-    docker-compose down
+    cp volumes/qwc2/themesConfig-example.json volumes/qwc2/themesConfig.json
 
 
 Configuration
