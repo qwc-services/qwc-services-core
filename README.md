@@ -120,6 +120,21 @@ Stop all containers:
 
 ### Add a QGIS project
 
+Setup PostgreSQL connection service file `~/.pg_service.conf`
+for DB connections from the host machine to PostGIS container:
+
+```
+cat >>~/.pg_service.conf <<EOS
+[qwc_geodb]
+host=localhost
+port=5439
+dbname=qwc_demo
+user=qwc_service
+password=qwc_service
+sslmode=disable
+EOS
+```
+
 * Open project `demo-projects/natural-earth-countries.qgz` with QGIS and save as `volumes/config-in/default/qgis_projects/natural-earth-countries.qgs`
 * Update configuration in Admin GUI
 
