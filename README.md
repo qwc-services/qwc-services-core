@@ -140,10 +140,16 @@ EOS
 
 ### Add an editable layer
 
-* Add layer in QGIS project
+* Add `edit_polygon` layer in QGIS project
 * Add map and data resources with permissions
+* Update configuration in Admin GUI
 
 ### Add a custom edit form
+
+Adapt edit form with Drag and Drop Designer:
+* Change attribute form type to `Drag and Drop Designer`.
+* Change form layout
+* Update configuration in Admin GUI
 
 Use the previously generated edit form in `volumes/qwc2/assets/forms/autogen/` as a template.
 
@@ -154,6 +160,11 @@ Copy the form into the volumes:
     sudo cp natural-earth-countries_edit_polygons.ui volumes/config-in/default/qgis_projects/
     sudo cp natural-earth-countries_edit_polygons.ui volumes/qgs-resources/
 
+Change attribute form type to `Provide ui-file`.
+
+Select `natural-earth-countries_edit_polygons.ui` as `Edit UI`.
+
+Update configuration in Admin GUI.
 
 ### Customize QWC2 Viewer
 
