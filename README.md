@@ -127,7 +127,7 @@ Stop all containers:
 
 ### Add a custom edit form
 
-Use the previously generated edit form as a template.
+Use the previously generated edit form in `volumes/qwc2/assets/forms/autogen/` as a template.
 
 Edit and save the form with QT Designer.
 
