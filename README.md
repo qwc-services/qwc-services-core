@@ -1,3 +1,6 @@
+[![PyPI version](https://img.shields.io/pypi/v/qwc-services-core)](https://pypi.org/project/qwc-services-core)
+
+
 QWC Services Core
 =================
 
