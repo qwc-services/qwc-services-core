@@ -117,7 +117,7 @@ Stop all containers:
 
 ### Add a QGIS project
 
-* Copy project to `volumes/config-in/default/qgis_projects/`
+* Open project `demo-projects/natural-earth-countries.qgz` with QGIS and save as `volumes/config-in/default/qgis_projects/natural-earth-countries.qgs`
 * Update configuration in Admin GUI
 
 ### Add an editable layer
