@@ -94,24 +94,17 @@
             "type": "object",
             "properties": {
               "all_services": {
-                "description": "Permitted resources for all services (top-level permitted layers and group layers, datasets with write permissions, document templates)",
-                "type": "array",
-                "items": {
-                  "title": "Resource permissions",
+                "description": "Permitted resources for all services (top-level permitted layers and group layers, datasets with write permissions, document templates). NOTE: Use resource name as property name for its permissions.",
+                "type": "object",
+                "additionalProperties": {
+                  "description": "Resource permissions",
                   "type": "object",
                   "properties": {
-                    "name": {
-                      "description": "Dataproduct reference or document template name",
-                      "type": "string"
-                    },
                     "writable": {
                       "description": "Writable flag for datasets with write permissions",
                       "type": "boolean"
                     }
-                  },
-                  "required": [
-                    "name"
-                  ]
+                  }
                 }
               }
             },

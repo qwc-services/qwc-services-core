@@ -147,15 +147,20 @@ class PermissionsReader():
         document_templates = []
         solr_facets = []
 
-        # copy writable flags from all_services to resources_lookup
-        for resource in role_permissions.get('all_services', []):
+        # convert all_services dict to resources list
+        all_services = []
+        for name, resource in role_permissions.get('all_services', {}).items():
+            all_services.append({
+                'name': name
+            })
+            # copy writable flags from all_services to resources_lookup
             if 'writable' in resource:
-                lookup = resources_lookup.get(resource['name'], {})
+                lookup = resources_lookup.get(name, {})
                 lookup['writable'] = resource['writable']
 
         # collect permitted resources for role
         role_resources = self.collect_resources(
-            role_permissions.get('all_services', []), resources_lookup
+            all_services, resources_lookup
         )
 
         # expand to full QWC service permissions
