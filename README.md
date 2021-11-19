@@ -303,6 +303,13 @@ e.g. `DEFAULT_ALLOW=True`: all maps and layers are permitted by default
 e.g. `DEFAULT_ALLOW=False`: maps and layers are only available if their resources and permissions are explicitly configured
 
 
+### Permissions file
+
+The [QWC Config Generator](https://github.com/qwc-services/qwc-config-generator) generates a JSON file for all permissions ([JSON schema](https://github.com/qwc-services/qwc-services-core/blob/master/schemas/qwc-services-permissions.json)) from the QWC ConfigDB. See READMEs of QWC services for service specific contents in `permissions.json`.
+
+Alternatively, a simplified permissions format is also supported, see [unified permissions](doc/unified_permissions.md).
+
+
 Group registration
 ------------------
 
