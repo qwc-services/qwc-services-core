@@ -83,7 +83,7 @@ Create a secret key:
 Set permissions for writable volumes:
 
     sudo chown -R www-data:www-data volumes/qgs-resources
-    sudo chown -R www-data:www-data demo-config
+    sudo chown -R www-data:www-data volumes/config
     sudo chown -R www-data:www-data volumes/qwc2/assets
 
     sudo chown 8983:8983 volumes/solr/data
@@ -165,6 +165,29 @@ Change attribute form type to `Provide ui-file`.
 Select `natural-earth-countries_edit_polygons.ui` as `Edit UI`.
 
 Update configuration in Admin GUI.
+
+### Enable Fulltext search
+
+Make solr owner of solr data
+    sudo chown 8983:8983 volumes/solr/data
+
+    # Cleanup
+    sudo rm -rf volumes/solr/data/*
+
+    docker-compose restart qwc-solr
+
+    curl 'http://localhost:8983/solr/gdi/dih_geodata?command=full-import'
+    curl 'http://localhost:8983/solr/gdi/dih_geodata?command=status'
+    curl 'http://localhost:8983/solr/gdi/select?q=search_1_stem:austr*'
+
+    curl 'http://localhost:8983/solr/gdi/dih_metadata?command=full-import&clean=false'
+    curl 'http://localhost:8983/solr/gdi/dih_metadata?command=status'
+    curl 'http://localhost:8983/solr/gdi/select?q=search_1_stem:qwc_demo'
+
+Test query for fulltext search:
+
+    curl 'http://localhost:8983/solr/gdi/select?q=search_1_stem:austr*'
+
 
 ### Customize QWC2 Viewer
 
