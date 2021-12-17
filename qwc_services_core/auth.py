@@ -3,7 +3,7 @@
 import os
 from flask import request
 from .jwt import jwt_manager
-from flask_jwt_extended import jwt_optional, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 # Accept user name passed in Basic Auth header
@@ -20,7 +20,7 @@ def auth_manager(app, api=None):
 
 def optional_auth(fn):
     """Authentication view decorator"""
-    return jwt_optional(fn)
+    return jwt_required(optional=True)(fn)
 
 
 def get_identity():
