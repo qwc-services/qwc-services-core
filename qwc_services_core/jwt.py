@@ -1,7 +1,23 @@
 import os
 import datetime
 from flask_jwt_extended import JWTManager, unset_jwt_cookies
-from flask import make_response
+from flask import make_response, Response
+
+
+class JwtErrorHandlerProxy:
+    def __init__(self, api):
+        self.api = api
+
+    def errorhandler(self, errortype):
+        return lambda jwt_callback: self.api.errorhandler(errortype)(lambda error: self.jwt_callback_wrapper(jwt_callback, error))
+
+    def jwt_callback_wrapper(self, jwt_callback, error):
+        result = jwt_callback(error)
+        # flask_restx error handler expects a plain object with an 'message' field
+        # See flask_restx/api.py@handle_error
+        if isinstance(result[0], Response):
+            return {"message": result[0].json["msg"]}, result[1]
+        return result
 
 
 def jwt_manager(app, api=None):
@@ -19,9 +35,11 @@ def jwt_manager(app, api=None):
     jwt = JWTManager(app)
 
     if api:
-        # Delegate error handlers to RestPlus because of
+        api.__jwt_error_handler_proxy = JwtErrorHandlerProxy(api)
+
+        # Delegate error handlers to flask_restx because of
         # https://github.com/vimalloc/flask-jwt-extended/issues/86
-        jwt._set_error_handler_callbacks(api)
+        jwt._set_error_handler_callbacks(api.__jwt_error_handler_proxy)
 
         @api.errorhandler
         def restplus_error_handler(error):
