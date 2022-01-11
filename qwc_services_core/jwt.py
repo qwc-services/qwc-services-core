@@ -2,7 +2,6 @@ import os
 import datetime
 from flask_jwt_extended import JWTManager, unset_jwt_cookies
 from flask import make_response, Response, redirect, request
-import urllib.parse
 
 
 class JwtErrorHandlerProxy:
@@ -59,8 +58,8 @@ def jwt_manager(app, api=None):
 
     @jwt.invalid_token_loader
     def handle_invalid_token(err):
-        # Redirect to login page on token error
-        resp = redirect('/auth/login?url=' + urllib.parse.quote(request.url))
+        # Unset cookies and redirect to requested page on token error
+        resp = redirect(request.url)
         unset_jwt_cookies(resp)
         return resp
 
