@@ -1,7 +1,8 @@
 import os
 import datetime
 from flask_jwt_extended import JWTManager, unset_jwt_cookies
-from flask import make_response, Response
+from flask import make_response, Response, redirect, request
+import urllib.parse
 
 
 class JwtErrorHandlerProxy:
@@ -53,6 +54,13 @@ def jwt_manager(app, api=None):
         # Automatic re-login does't work with SAML, so we prepare
         # for manual re-login
         resp = make_response()
+        unset_jwt_cookies(resp)
+        return resp
+
+    @jwt.invalid_token_loader
+    def handle_invalid_token(err):
+        # Redirect to login page on token error
+        resp = redirect('/auth/login?url=' + urllib.parse.quote(request.url))
         unset_jwt_cookies(resp)
         return resp
 
