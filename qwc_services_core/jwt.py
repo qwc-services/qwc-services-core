@@ -47,12 +47,9 @@ def jwt_manager(app, api=None):
             return {}
 
     @jwt.expired_token_loader
-    def handle_expired_token():
-        # http://flask-jwt-extended.readthedocs.io/en/latest/changing_default_behavior.html
-        # resp = redirect('/auth/login')
-        # Automatic re-login does't work with SAML, so we prepare
-        # for manual re-login
-        resp = make_response()
+    def handle_expired_token(jwtheader, jwtdata):
+        # Unset cookies and redirect to requested page on expired token
+        resp = redirect(request.url)
         unset_jwt_cookies(resp)
         return resp
 
