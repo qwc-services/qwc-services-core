@@ -15,7 +15,7 @@ class JwtErrorHandlerProxy:
         result = jwt_callback(error)
         # flask_restx error handler expects a plain object with an 'message' field
         # See flask_restx/api.py@handle_error
-        if isinstance(result[0], Response):
+        if isinstance(result, list) and isinstance(result[0], Response):
             return {"message": result[0].json["msg"]}, result[1]
         return result
 
