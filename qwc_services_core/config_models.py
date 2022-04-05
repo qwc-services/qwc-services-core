@@ -106,7 +106,8 @@ class ConfigModels():
 
         Group.users_collection = relationship(
             User,
-            secondary='qwc_config.groups_users'
+            secondary='qwc_config.groups_users',
+            overlaps="groups_collection,user_collection"
         )
 
         # sorted group users
@@ -128,7 +129,8 @@ class ConfigModels():
 
         Role.users_collection = relationship(
             User,
-            secondary='qwc_config.users_roles'
+            secondary='qwc_config.users_roles',
+            overlaps="roles_collection,user_collection"
         )
 
         # sorted role users
@@ -154,7 +156,8 @@ class ConfigModels():
             Resource,
             foreign_keys=[Resource.parent_id],
             order_by=Resource.name,
-            backref=backref('parent', remote_side=[Resource.id])
+            backref=backref('parent', remote_side=[Resource.id]),
+            overlaps="resources,resources_collection"
         )
 
         # resource type
@@ -166,26 +169,31 @@ class ConfigModels():
         # permission role and resource with singular attribute names
         Permission = Base.classes.permissions
         Permission.role = relationship(
-            Role
+            Role,
+            overlaps="permissions_collection,roles"
         )
         Permission.resource = relationship(
-            Resource
+            Resource,
+            overlaps="permissions_collection,resources"
         )
 
         # group for registrable group with singular attribute name
         RegistrableGroup = Base.classes.registrable_groups
         RegistrableGroup.group = relationship(
-            Group
+            Group,
+            overlaps="groups,registrable_groups_collection"
         )
 
         # user and registrable group for registration request with
         # singular attribute names
         RegistrationRequest = Base.classes.registration_requests
         RegistrationRequest.user = relationship(
-            User
+            User,
+            overlaps="registration_requests"
         )
         RegistrationRequest.registrable_group = relationship(
-            RegistrableGroup
+            RegistrableGroup,
+            overlaps="registrable_groups,registration_requests_collection"
         )
 
         # user registration requests
