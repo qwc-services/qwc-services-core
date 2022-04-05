@@ -163,7 +163,8 @@ class ConfigModels():
         # resource type
         ResourceType = Base.classes.resource_types
         Resource.resource_type = relationship(
-            ResourceType
+            ResourceType,
+            overlaps="resource_types,resources_collection"
         )
 
         # permission role and resource with singular attribute names
