@@ -1,23 +1,9 @@
 import os
 import datetime
+import json
 from flask_jwt_extended import JWTManager, unset_jwt_cookies
-from flask import make_response, Response, redirect, request
-
-
-class JwtErrorHandlerProxy:
-    def __init__(self, api):
-        self.api = api
-
-    def errorhandler(self, errortype):
-        return lambda jwt_callback: self.api.errorhandler(errortype)(lambda error: self.jwt_callback_wrapper(jwt_callback, error))
-
-    def jwt_callback_wrapper(self, jwt_callback, error):
-        result = jwt_callback(error)
-        # flask_restx error handler expects a plain object with an 'message' field
-        # See flask_restx/api.py@handle_error
-        if isinstance(result, list) and isinstance(result[0], Response):
-            return {"message": result[0].json["msg"]}, result[1]
-        return result
+from flask import redirect, request
+from jwt.exceptions import PyJWTError
 
 
 def jwt_manager(app, api=None):
@@ -35,30 +21,27 @@ def jwt_manager(app, api=None):
 
     jwt = JWTManager(app)
 
-    if api:
-        api.__jwt_error_handler_proxy = JwtErrorHandlerProxy(api)
+    @app.after_request
+    def handle_jwt_exceptions(resp):
+        # If error is a JWT error, unset JWT cookies and redirect to requested URL
+        if resp.status_code == 500 and resp.content_type == "application/json":
+            data = json.loads(resp.data)
+            if "message" in data and data["message"].startswith("jwtexception:"):
+                resp = redirect(request.url)
+                unset_jwt_cookies(resp)
+                return resp
 
-        # Delegate error handlers to flask_restx because of
-        # https://github.com/vimalloc/flask-jwt-extended/issues/86
-        jwt._set_error_handler_callbacks(api.__jwt_error_handler_proxy)
+        return resp
+
+    if api:
 
         @api.errorhandler
         def restplus_error_handler(error):
-            # JWT error handler will be called afterwards
+            # If error is a JWT error, prefix message with jwtexception: so that it
+            # can be recognized in handle_jwt_exceptions above
+            if isinstance(error, PyJWTError):
+                return {"message": "jwtexception:%s" % str(error)}
+
             return {}
-
-    @jwt.expired_token_loader
-    def handle_expired_token(jwtheader, jwtdata):
-        # Unset cookies and redirect to requested page on expired token
-        resp = redirect(request.url)
-        unset_jwt_cookies(resp)
-        return resp
-
-    @jwt.invalid_token_loader
-    def handle_invalid_token(err):
-        # Unset cookies and redirect to requested page on token error
-        resp = redirect(request.url)
-        unset_jwt_cookies(resp)
-        return resp
 
     return jwt
