@@ -44,4 +44,18 @@ def jwt_manager(app, api=None):
 
             return {}
 
+    @jwt.expired_token_loader
+    def handle_expired_token(jwtheader, jwtdata):
+        # Unset cookies and redirect to requested page on expired token
+        resp = redirect(request.url)
+        unset_jwt_cookies(resp)
+        return resp
+
+    @jwt.invalid_token_loader
+    def handle_invalid_token(err):
+        # Unset cookies and redirect to requested page on token error
+        resp = redirect(request.url)
+        unset_jwt_cookies(resp)
+        return resp
+
     return jwt
