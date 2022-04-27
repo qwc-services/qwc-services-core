@@ -62,6 +62,21 @@ class RuntimeConfig:
                 val = envval
             elif type(val) in (list, dict):
                 val = json.loads(envval)
+            elif type(val) is bool:
+                # convert string to boolean
+                # cf. deprecated distutils.util.strtobool
+                #   https://docs.python.org/3.9/distutils/apiref.html#distutils.util.strtobool
+                if envval.lower() in ('true', 't', '1', 'on', 'yes', 'y'):
+                    val = True
+                elif envval.lower() in ('false', 'f', '0', 'off', 'no', 'n', ''):
+                    # NOTE: also convert empty string to False
+                    #       to support legacy env configs (bool("") => False)
+                    val = False
+                else:
+                    self.logger.warning(
+                        "Config override from env '%s=%s' is not a boolean" %
+                        (name.upper(), envval)
+                    )
             else:
                 val = type(val)(envval)
 
