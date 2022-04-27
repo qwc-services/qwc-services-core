@@ -84,7 +84,8 @@ class ConfigModels():
         User.user_info = relationship(
             UserInfo,
             uselist=False,
-            back_populates="user"
+            back_populates="user",
+            overlaps="user_infos_collection"
         )
 
         # sorted user groups
@@ -156,7 +157,10 @@ class ConfigModels():
             Resource,
             foreign_keys=[Resource.parent_id],
             order_by=Resource.name,
-            backref=backref('parent', remote_side=[Resource.id]),
+            backref=backref(
+                'parent', remote_side=[Resource.id],
+                overlaps="resources,resources_collection"
+            ),
             overlaps="resources,resources_collection"
         )
 
