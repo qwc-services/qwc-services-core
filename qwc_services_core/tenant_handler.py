@@ -118,19 +118,9 @@ class TenantPrefixMiddleware:
 
     def __init__(self, app, _header=None, _ignore_default=None):
         self.app = app
-        tenant_header = os.environ.get('TENANT_HEADER')
-        if tenant_header:
-            self.header = 'HTTP_' + tenant_header.upper()
-        else:
-            self.header = None
+        self.tenant_handler = TenantHandlerBase()
         self.service_prefix = os.environ.get(
             'QWC_SERVICE_PREFIX', '/').rstrip('/') + '/'
-
-    def request_tenant(self, environ):
-        if self.header:
-            return environ.get(self.header)
-        else:
-            return None
 
     def __call__(self, environ, start_response):
         # environ in request http://localhost:9090/base/pages/test.html?arg=1
@@ -140,7 +130,8 @@ class TenantPrefixMiddleware:
         # 'PATH_INFO': '/pages/test.html'
         # 'QUERY_STRING': 'arg=1'
         # see also https://www.python.org/dev/peps/pep-3333/#environ-variables
-        tenant = self.request_tenant(environ)
+        tenant = self.tenant_handler.tenant()
+
         if tenant:
             prefix = self.service_prefix + tenant
             environ['SCRIPT_NAME'] = prefix + environ.get(
