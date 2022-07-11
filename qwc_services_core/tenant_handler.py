@@ -132,7 +132,7 @@ class TenantPrefixMiddleware:
         # see also https://www.python.org/dev/peps/pep-3333/#environ-variables
         tenant = self.tenant_handler.tenant()
 
-        if tenant:
+        if tenant and tenant != DEFAULT_TENANT:
             prefix = self.service_prefix + tenant
             environ['SCRIPT_NAME'] = prefix + environ.get(
                 'SCRIPT_NAME', '')
