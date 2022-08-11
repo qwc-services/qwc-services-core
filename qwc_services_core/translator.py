@@ -1,3 +1,4 @@
+import glob
 import json
 import os
 
@@ -11,9 +12,14 @@ class Translator:
         :param object app: The Flask app
         :param object request: The Flask requst
         """
-        DEFAULT_LOCALE = os.environ.get('DEFAULT_LOCALE', 'en')
-        locale = request.headers.get("Accept-Language", DEFAULT_LOCALE)[0:2]
 
+        supported_locales = list(map(
+            lambda path: os.path.basename(path)[0:-5],
+            glob.glob('translations/*.json')
+        ))
+
+        DEFAULT_LOCALE = os.environ.get('DEFAULT_LOCALE', 'en')
+        locale = request.accept_languages.best_match(supported_locales) or DEFAULT_LOCALE
 
         self.translations = {}
         try:
