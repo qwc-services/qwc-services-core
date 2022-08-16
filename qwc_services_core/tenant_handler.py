@@ -25,10 +25,30 @@ class TenantHandlerBase:
         return self.tenant_name or self.tenant_header or self.tenant_url_re
 
     def tenant(self):
+        """Return tenant for current request."""
+        return self.request_tenant()
+
+    def environ_tenant(self, environ):
+        """Return tenant for environ from WSGI middleware.
+
+        :param dict environ: WSGI environment variables
+        """
+        return self.request_tenant(environ)
+
+    def request_tenant(self, environ=None):
+        """Return tenant for current request or environ.
+
+        :param dict environ: WSGI environment variables if using tenant header
+        """
         if self.tenant_name:
             return self.tenant_name
         if self.tenant_header:
-            return request.headers.get(self.tenant_header, DEFAULT_TENANT)
+            if environ:
+                return environ.get(
+                    "HTTP_%s" % self.tenant_header.upper(), DEFAULT_TENANT
+                )
+            else:
+                return request.headers.get(self.tenant_header, DEFAULT_TENANT)
         if self.tenant_url_re:
             match = self.tenant_url_re.match(request.base_url)
             if match:
@@ -130,7 +150,7 @@ class TenantPrefixMiddleware:
         # 'PATH_INFO': '/pages/test.html'
         # 'QUERY_STRING': 'arg=1'
         # see also https://www.python.org/dev/peps/pep-3333/#environ-variables
-        tenant = self.tenant_handler.tenant()
+        tenant = self.tenant_handler.environ_tenant(environ)
 
         if tenant and tenant != DEFAULT_TENANT:
             prefix = self.service_prefix + tenant
