@@ -50,7 +50,18 @@ class TenantHandlerBase:
             else:
                 return request.headers.get(self.tenant_header, DEFAULT_TENANT)
         if self.tenant_url_re:
-            match = self.tenant_url_re.match(request.base_url)
+            if environ:
+                # reconstruct request URL from environ
+                # cf. https://peps.python.org/pep-3333/#url-reconstruction
+                base_url = "%s://%s%s%s" % (
+                    environ.get('wsgi.url_scheme', ''),
+                    environ.get('HTTP_HOST', ''),
+                    environ.get('SCRIPT_NAME', ''),
+                    environ.get('PATH_INFO', '')
+                )
+            else:
+                base_url = request.base_url
+            match = self.tenant_url_re.match(base_url)
             if match:
                 return match.group(1)
             else:
