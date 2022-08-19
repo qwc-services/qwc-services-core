@@ -163,7 +163,12 @@ class TenantPrefixMiddleware:
         # see also https://www.python.org/dev/peps/pep-3333/#environ-variables
         tenant = self.tenant_handler.environ_tenant(environ)
 
-        if tenant and tenant != DEFAULT_TENANT:
+        if tenant and (
+            self.tenant_handler.tenant_name or
+            self.tenant_handler.tenant_header
+        ):
+            # add tenant path prefix for multitenancy
+            # NOTE: skipped if tenant already in path when using TENANT_URL_RE
             prefix = self.service_prefix + tenant
             environ['SCRIPT_NAME'] = prefix + environ.get(
                 'SCRIPT_NAME', '')
