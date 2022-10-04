@@ -102,7 +102,8 @@ class TenantHandler(TenantHandlerBase):
                     return handler.get('handler')
                 else:
                     # config has changed, remove handler from cache
-                    del handlers[tenant]
+                    if tenant in handlers:
+                        del handlers[tenant]
 
         return None
 
