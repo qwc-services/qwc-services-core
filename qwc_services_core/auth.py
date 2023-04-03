@@ -1,6 +1,7 @@
 """Authentication helper functions
 """
 import os
+import re
 from flask import request
 from .jwt import jwt_manager
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -62,3 +63,33 @@ def get_auth_user():
             # We don't check password, already authenticated!
             identity = auth.username
     return identity
+
+
+class GroupNameMapper:
+    """Group name mapping with regular expressions"""
+
+    def __init__(self, default=''):
+        group_mappings = os.environ.get('GROUP_MAPPINGS', default)
+
+        def collect(mapping):
+            regex, *replacement = mapping.split('~', 1)
+            return (re.compile(regex), replacement[0])
+
+        self.group_mappings = list(
+            map(collect, group_mappings.split('#'))) if group_mappings else []
+
+    def mapped_group(self, group):
+        # LDAP servers my return a group as list object
+        if isinstance(group, list):
+            group = ' '.join(group)
+        for (regex, replacement) in self.group_mappings:
+            if regex.match(group):
+                return regex.sub(replacement, group)
+        return group
+
+# Usage examples:
+# mapper = GroupNameMapper('ship_crew~crew#gis.role.(.*)~\\1')
+# print(mapper.mapped_group('ship_crew'))
+# print(mapper.mapped_group('gis.role.admin'))
+# print(mapper.mapped_group('gis.role.user.group1'))
+# print(mapper.mapped_group('gis.none'))
