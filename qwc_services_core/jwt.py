@@ -18,6 +18,8 @@ def jwt_manager(app, api=None):
     app.config['JWT_CSRF_CHECK_FORM'] = True
     app.config['JWT_SECRET_KEY'] = os.environ.get(
         'JWT_SECRET_KEY', os.urandom(24))
+    app.config['JWT_ACCESS_COOKIE_PATH'] = os.environ.get(
+        'JWT_ACCESS_COOKIE_PATH', '/')
 
     jwt = JWTManager(app)
 
