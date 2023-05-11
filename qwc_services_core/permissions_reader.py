@@ -1,7 +1,8 @@
 from copy import deepcopy
 import os
 
-from flask import json, safe_join
+from flask import json
+from werkzeug.utils import safe_join
 from .auth import get_username, get_groups
 
 

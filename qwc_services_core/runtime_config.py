@@ -1,6 +1,7 @@
 import os
 import re
-from flask import json, safe_join
+from flask import json
+from werkzeug.utils import safe_join
 
 
 class RuntimeConfig:
