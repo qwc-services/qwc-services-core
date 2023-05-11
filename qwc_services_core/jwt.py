@@ -60,4 +60,9 @@ def jwt_manager(app, api=None):
         unset_jwt_cookies(resp)
         return resp
 
+    @jwt.unauthorized_loader
+    def unauthorized(err):
+        # Redirect to requested page on authorized error (i.e. CSRF token error)
+        return redirect(request.url)
+
     return jwt
