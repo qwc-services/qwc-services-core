@@ -25,25 +25,31 @@ def optional_auth(fn):
 
 
 def get_identity():
-    """Get identity (username oder dict with username and groups)"""
-    return get_jwt_identity()
+    """Get identity (username or dict with username and groups)
+       or optional pre-authenticated basic auth user"""
+    identity = get_jwt_identity()
+    if not identity and ALLOW_BASIC_AUTH_USER:
+        auth = request.authorization
+        if auth:
+            # We don't check password, already authenticated!
+            identity = auth.username
+    return identity
 
 
 def get_username(identity):
-    """Get username"""
+    """Extract username from identity"""
+    username = None
     if identity:
         if isinstance(identity, dict):
             username = identity.get('username')
         else:
             # identity is username
             username = identity
-    else:
-        username = None
     return username
 
 
 def get_groups(identity):
-    """Get user groups"""
+    """Extract user groups from identity"""
     groups = []
     if identity:
         if isinstance(identity, dict):
@@ -52,17 +58,6 @@ def get_groups(identity):
             if group:
                 groups.append(group)
     return groups
-
-
-def get_auth_user():
-    """Get identity or optional pre-authenticated basic auth user"""
-    identity = get_identity()
-    if not identity and ALLOW_BASIC_AUTH_USER:
-        auth = request.authorization
-        if auth:
-            # We don't check password, already authenticated!
-            identity = auth.username
-    return identity
 
 
 class GroupNameMapper:
