@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 import os
 import re
 from flask import request
@@ -115,7 +115,7 @@ class TenantHandler(TenantHandlerBase):
             self.handler_cache[handler_name] = handlers
         handlers[tenant] = {
             'handler': handler,
-            'last_update': datetime.utcnow()
+            'last_update': datetime.datetime.now(datetime.UTC)
         }
         return handler
 
@@ -133,8 +133,9 @@ class TenantHandler(TenantHandlerBase):
         ]
         for path in paths:
             if os.path.isfile(path):
-                timestamp = datetime.utcfromtimestamp(
-                    os.path.getmtime(path)
+                timestamp = datetime.datetime.fromtimestamp(
+                    os.path.getmtime(path),
+                    datetime.UTC
                 )
                 if (
                     last_config_update is None
