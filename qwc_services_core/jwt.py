@@ -49,6 +49,7 @@ def jwt_manager(app, api=None):
     @jwt.expired_token_loader
     def handle_expired_token(jwtheader, jwtdata):
         # Unset cookies and redirect to requested page on expired token
+        app.logger.warn("Expired token: %s" % str(err))
         resp = redirect(request.url)
         unset_jwt_cookies(resp)
         return resp
@@ -56,6 +57,7 @@ def jwt_manager(app, api=None):
     @jwt.invalid_token_loader
     def handle_invalid_token(err):
         # Unset cookies and redirect to requested page on token error
+        app.logger.warn("Invalid token: %s" % str(err))
         resp = redirect(request.url)
         unset_jwt_cookies(resp)
         return resp
@@ -63,6 +65,7 @@ def jwt_manager(app, api=None):
     @jwt.unauthorized_loader
     def unauthorized(err):
         # Redirect to requested page on authorized error (i.e. CSRF token error)
+        app.logger.warn("Unauthorized: %s" % str(err))
         return redirect(request.url)
 
     return jwt
