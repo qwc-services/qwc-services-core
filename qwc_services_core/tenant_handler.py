@@ -113,9 +113,14 @@ class TenantHandler(TenantHandlerBase):
         if handlers is None:
             handlers = {}
             self.handler_cache[handler_name] = handlers
+        try:
+            now = datetime.datetime.now(datetime.UTC)
+        except:
+            # Python < 3.11 fallback
+            now = datetime.datetime.utcnow()
         handlers[tenant] = {
             'handler': handler,
-            'last_update': datetime.datetime.now(datetime.UTC)
+            'last_update': now
         }
         return handler
 
@@ -133,10 +138,16 @@ class TenantHandler(TenantHandlerBase):
         ]
         for path in paths:
             if os.path.isfile(path):
-                timestamp = datetime.datetime.fromtimestamp(
-                    os.path.getmtime(path),
-                    datetime.UTC
-                )
+                try:
+                    timestamp = datetime.datetime.fromtimestamp(
+                        os.path.getmtime(path),
+                        datetime.UTC
+                    )
+                except:
+                    # Python < 3.11 fallback
+                    timestamp = datetime.datetime.utcfromtimestamp(
+                        os.path.getmtime(path)
+                    )
                 if (
                     last_config_update is None
                     or timestamp > last_config_update
