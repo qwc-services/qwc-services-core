@@ -35,6 +35,16 @@ def jwt_manager(app, api=None):
 
         return resp
 
+    @app.before_request
+    def set_jwt_access_cookie_path():
+        # If app.session_interface is a TenantSessionInterface, JWT_ACCESS_COOKIE_PATH is set regarding tenant
+        # Else it takes value from SESSION_COOKIE_PATH config var, or APPLICATION_ROOT or /
+        # https://flask.palletsprojects.com/en/3.0.x/api/#flask.sessions.SessionInterface.get_cookie_path
+        from .tenant_handler import TenantSessionInterface
+        if isinstance(app.session_interface, TenantSessionInterface):
+            if app.session_interface.is_multi():
+                app.session_interface.get_cookie_path(app)
+
     if api:
 
         @api.errorhandler
