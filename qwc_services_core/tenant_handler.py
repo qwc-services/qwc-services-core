@@ -195,7 +195,7 @@ class TenantSessionInterface(SecureCookieSessionInterface, TenantHandlerBase):
         SecureCookieSessionInterface.__init__(self)
         TenantHandlerBase.__init__(self)
         self.service_prefix = environ.get(
-            'QWC_SERVICE_PREFIX', '').rstrip('/') + '/'
+            'QWC_SERVICE_PREFIX', '').rstrip('/')
 
     def tenant_path_prefix(self):
         """Tenant path prefix /map/org1 ("$QWC_SERVICE_PREFIX/$TENANT")"""
