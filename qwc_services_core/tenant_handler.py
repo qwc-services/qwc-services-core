@@ -182,7 +182,11 @@ class TenantPrefixMiddleware:
         ):
             # add tenant path prefix for multitenancy
             # NOTE: skipped if tenant already in path when using TENANT_URL_RE
-            prefix = os.environ.get('TENANT_PATH_PREFIX', '@service_prefix@/@tenant@').replace('@service_prefix@', self.service_prefix).replace('@tenant@', tenant)
+            prefix = os.environ.get(
+                'TENANT_PATH_PREFIX', '@service_prefix@/@tenant@'
+            ).replace(
+                '@service_prefix@', self.service_prefix
+            ).replace('@tenant@', tenant)
             environ['SCRIPT_NAME'] = prefix + environ.get(
                 'SCRIPT_NAME', '')
         return self.app(environ, start_response)
@@ -200,7 +204,11 @@ class TenantSessionInterface(SecureCookieSessionInterface, TenantHandlerBase):
     def tenant_path_prefix(self):
         """Tenant path prefix /map/org1 ("$QWC_SERVICE_PREFIX/$TENANT")"""
         if self.is_multi():
-            return os.environ.get('TENANT_PATH_PREFIX', '@service_prefix@/@tenant@').replace('@service_prefix@', self.service_prefix).replace('@tenant@', self.tenant())
+            return os.environ.get(
+                'TENANT_PATH_PREFIX', '@service_prefix@/@tenant@'
+            ).replace(
+                '@service_prefix@', self.service_prefix
+            ).replace('@tenant@', self.tenant())
         else:
             return self.service_prefix + "/"
 
