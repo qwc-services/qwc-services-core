@@ -164,7 +164,7 @@ class TenantPrefixMiddleware:
         self.app = app
         self.tenant_handler = TenantHandlerBase()
         self.service_prefix = os.environ.get(
-            'QWC_SERVICE_PREFIX', '/').rstrip('/') + '/'
+            'QWC_SERVICE_PREFIX', '/').rstrip('/')
 
     def __call__(self, environ, start_response):
         # environ in request http://localhost:9090/base/pages/test.html?arg=1
@@ -182,7 +182,7 @@ class TenantPrefixMiddleware:
         ):
             # add tenant path prefix for multitenancy
             # NOTE: skipped if tenant already in path when using TENANT_URL_RE
-            prefix = self.service_prefix + tenant
+            prefix = os.environ.get('TENANT_PATH_PREFIX', '@service_prefix@/@tenant@').replace('@service_prefix@', self.service_prefix).replace('@tenant@', tenant)
             environ['SCRIPT_NAME'] = prefix + environ.get(
                 'SCRIPT_NAME', '')
         return self.app(environ, start_response)
@@ -200,9 +200,9 @@ class TenantSessionInterface(SecureCookieSessionInterface, TenantHandlerBase):
     def tenant_path_prefix(self):
         """Tenant path prefix /map/org1 ("$QWC_SERVICE_PREFIX/$TENANT")"""
         if self.is_multi():
-            return self.service_prefix + self.tenant()
+            return os.environ.get('TENANT_PATH_PREFIX', '@service_prefix@/@tenant@').replace('@service_prefix@', self.service_prefix).replace('@tenant@', self.tenant())
         else:
-            return self.service_prefix
+            return self.service_prefix + "/"
 
     def get_cookie_path(self, app):
         # https://flask.palletsprojects.com/en/1.1.x/api/#flask.sessions.SessionInterface.get_cookie_path
