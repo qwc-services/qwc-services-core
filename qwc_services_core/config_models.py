@@ -6,16 +6,13 @@ from sqlalchemy.orm import Session, backref, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-qwc_config_schema = os.getenv("QWC_CONFIG_SCHEMA", "qwc_config")
-
-
 class ConfigModels():
     """ConfigModels class
 
     Provide SQLAlchemy ORM models for ConfigDB queries.
     """
 
-    def __init__(self, db_engine, conn_str=None, extra_tables=[]):
+    def __init__(self, db_engine, conn_str=None, extra_tables=[], qwc_config_schema="qwc_config"):
         """Constructor
 
         :param DatabaseEngine db_engine: Database engine with DB connections
@@ -24,6 +21,7 @@ class ConfigModels():
             self.engine = db_engine.db_engine(conn_str)
         else:
             self.engine = db_engine.config_db()
+        self.qwc_config_schema = qwc_config_schema
 
         # init models
         self.base = None
@@ -61,13 +59,13 @@ class ConfigModels():
             return (table_name in TABLES)
 
         metadata = MetaData()
-        metadata.reflect(self.engine, schema=qwc_config_schema, only=table_selector)
+        metadata.reflect(self.engine, schema=self.qwc_config_schema, only=table_selector)
         Base = automap_base(metadata=metadata)
 
         # setup user model for flask_login
         class User(UserMixin, Base):
             __tablename__ = 'users'
-            __table_args__ = ({"schema": qwc_config_schema})
+            __table_args__ = ({"schema": self.qwc_config_schema})
 
             def set_password(self, password):
                 self.password_hash = generate_password_hash(password, method='pbkdf2')
@@ -95,7 +93,7 @@ class ConfigModels():
         # sorted user groups
         User.sorted_groups = relationship(
             Group,
-            secondary=qwc_config_schema + '.groups_users',
+            secondary=self.qwc_config_schema + '.groups_users',
             order_by=Group.name,
             # avoid duplicate group DELETE on User delete
             viewonly=True
@@ -103,7 +101,7 @@ class ConfigModels():
         # sorted user roles
         User.sorted_roles = relationship(
             Role,
-            secondary=qwc_config_schema + '.users_roles',
+            secondary=self.qwc_config_schema + '.users_roles',
             order_by=Role.name,
             # avoid duplicate role DELETE on User delete
             viewonly=True
@@ -111,14 +109,14 @@ class ConfigModels():
 
         Group.users_collection = relationship(
             User,
-            secondary=qwc_config_schema + '.groups_users',
+            secondary=self.qwc_config_schema + '.groups_users',
             overlaps="groups_collection,user_collection"
         )
 
         # sorted group users
         Group.sorted_users = relationship(
             User,
-            secondary=qwc_config_schema + '.groups_users',
+            secondary=self.qwc_config_schema + '.groups_users',
             order_by=User.name,
             # avoid duplicate user DELETE on Group delete
             viewonly=True
@@ -126,7 +124,7 @@ class ConfigModels():
         # sorted group roles
         Group.sorted_roles = relationship(
             Role,
-            secondary=qwc_config_schema + '.groups_roles',
+            secondary=self.qwc_config_schema + '.groups_roles',
             order_by=Role.name,
             # avoid duplicate role DELETE on Group delete
             viewonly=True
@@ -134,14 +132,14 @@ class ConfigModels():
 
         Role.users_collection = relationship(
             User,
-            secondary=qwc_config_schema + '.users_roles',
+            secondary=self.qwc_config_schema + '.users_roles',
             overlaps="roles_collection,user_collection"
         )
 
         # sorted role users
         Role.sorted_users = relationship(
             User,
-            secondary=qwc_config_schema + '.users_roles',
+            secondary=self.qwc_config_schema + '.users_roles',
             order_by=User.name,
             # avoid duplicate user DELETE on Role delete
             viewonly=True
@@ -149,7 +147,7 @@ class ConfigModels():
         # sorted roles groups
         Role.sorted_groups = relationship(
             Group,
-            secondary=qwc_config_schema + '.groups_roles',
+            secondary=self.qwc_config_schema + '.groups_roles',
             order_by=Group.name,
             # avoid duplicate group DELETE on Role delete
             viewonly=True
