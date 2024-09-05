@@ -202,13 +202,15 @@ class TenantSessionInterface(SecureCookieSessionInterface, TenantHandlerBase):
             'QWC_SERVICE_PREFIX', '').rstrip('/')
 
     def tenant_path_prefix(self):
-        """Tenant path prefix /map/org1 ("$QWC_SERVICE_PREFIX/$TENANT")"""
+        """Tenant path prefix /map/org1/ ("$QWC_SERVICE_PREFIX/$TENANT/")"""
         if self.is_multi():
             return os.environ.get(
                 'TENANT_PATH_PREFIX', '@service_prefix@/@tenant@'
             ).replace(
                 '@service_prefix@', self.service_prefix
-            ).replace('@tenant@', self.tenant())
+            ).replace(
+                '@tenant@', self.tenant()
+            ).rstrip('/') + '/'
         else:
             return self.service_prefix + "/"
 
