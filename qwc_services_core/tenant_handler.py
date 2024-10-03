@@ -216,7 +216,10 @@ class TenantSessionInterface(SecureCookieSessionInterface, TenantHandlerBase):
 
     def get_cookie_path(self, app):
         # https://flask.palletsprojects.com/en/1.1.x/api/#flask.sessions.SessionInterface.get_cookie_path
-        prefix = self.tenant_path_prefix()
+        if os.environ.get("OVERRIDE_ACCESS_COOKIE_PATH", None):
+            prefix = os.environ.get("OVERRIDE_ACCESS_COOKIE_PATH")
+        else:
+            prefix = self.tenant_path_prefix()
         # Set config as a side effect
         app.config['JWT_ACCESS_COOKIE_PATH'] = prefix
         return prefix
