@@ -6,6 +6,9 @@ from flask import redirect, request
 from jwt.exceptions import PyJWTError
 
 
+AUTH_PATH = os.environ.get('AUTH_PATH', '/auth')
+
+
 def jwt_manager(app, api=None):
     """Setup Flask-JWT-Extended extension for services
        with authenticated access"""
@@ -23,15 +26,17 @@ def jwt_manager(app, api=None):
 
     jwt = JWTManager(app)
 
+
+    def auth_path_prefix():
+        return app.session_interface.tenant_path_prefix().rstrip("/") + "/" + AUTH_PATH.lstrip("/")
+
     @app.after_request
     def handle_jwt_exceptions(resp):
         # If error is a JWT error, unset JWT cookies and redirect to requested URL
         if resp.status_code == 500 and resp.content_type == "application/json":
             data = json.loads(resp.data)
             if "message" in data and data["message"].startswith("jwtexception:"):
-                resp = redirect(request.url)
-                unset_jwt_cookies(resp)
-                return resp
+                return redirect(auth_path_prefix() + '/logout?url=%s' % request.url)
 
         return resp
 
@@ -60,17 +65,13 @@ def jwt_manager(app, api=None):
     def handle_expired_token(jwtheader, jwtdata):
         # Unset cookies and redirect to requested page on expired token
         app.logger.warn("Expired token")
-        resp = redirect(request.url)
-        unset_jwt_cookies(resp)
-        return resp
+        return redirect(auth_path_prefix() + '/logout?url=%s' % request.url)
 
     @jwt.invalid_token_loader
     def handle_invalid_token(err):
         # Unset cookies and redirect to requested page on token error
         app.logger.warn("Invalid token: %s" % str(err))
-        resp = redirect(request.url)
-        unset_jwt_cookies(resp)
-        return resp
+        return redirect(auth_path_prefix() + '/logout?url=%s' % request.url)
 
     @jwt.unauthorized_loader
     def unauthorized(err):
