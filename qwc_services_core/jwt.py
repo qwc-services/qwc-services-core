@@ -30,13 +30,19 @@ def jwt_manager(app, api=None):
     def auth_path_prefix():
         return app.session_interface.tenant_path_prefix().rstrip("/") + "/" + AUTH_PATH.lstrip("/")
 
+    def handle_bad_jwt():
+        redirect_url = auth_path_prefix() + '/login?url=%s' % request.args.get('url', request.url)
+        resp = redirect(redirect_url)
+        unset_jwt_cookies(resp)
+        return resp
+
     @app.after_request
     def handle_jwt_exceptions(resp):
         # If error is a JWT error, redirect to login
         if resp.status_code == 500 and resp.content_type == "application/json":
             data = json.loads(resp.data)
             if "message" in data and data["message"].startswith("jwtexception:"):
-                return redirect(auth_path_prefix() + '/login?url=%s' % request.url)
+                return handle_bad_jwt()
 
         return resp
 
@@ -65,13 +71,13 @@ def jwt_manager(app, api=None):
     def handle_expired_token(jwtheader, jwtdata):
         # Redirect to login on expired token
         app.logger.warn("Expired token")
-        return redirect(auth_path_prefix() + '/login?url=%s' % request.url)
+        return handle_bad_jwt()
 
     @jwt.invalid_token_loader
     def handle_invalid_token(err):
         # Redirect to login on token error
         app.logger.warn("Invalid token: %s" % str(err))
-        return redirect(auth_path_prefix() + '/login?url=%s' % request.url)
+        return handle_bad_jwt()
 
     @jwt.unauthorized_loader
     def unauthorized(err):
