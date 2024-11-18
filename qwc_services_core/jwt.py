@@ -23,6 +23,7 @@ def jwt_manager(app, api=None):
         'JWT_SECRET_KEY', os.urandom(24))
     app.config['JWT_ACCESS_COOKIE_PATH'] = os.environ.get(
         'JWT_ACCESS_COOKIE_PATH', '/')
+    app.config['JWT_IDENTITY_CLAIM'] = "qwc_identity"
 
     jwt = JWTManager(app)
 
