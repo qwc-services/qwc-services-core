@@ -24,6 +24,11 @@ class RuntimeConfig:
         self.logger = logger
         self.config = None
 
+    def set_config(self, config):
+        """ Directly sets the internal config object. """
+        self.config = config
+        return self
+
     def read_config(self, tenant):
         """Read service config for a tenant from a JSON file.
 
