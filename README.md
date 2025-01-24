@@ -14,6 +14,11 @@ This repository contains the shared modules for QWC services.
 Development
 ===========
 
+This repository contains a [justfile](https://just.systems/man/en/) with various helper tasks for releasing etc.
+Add a symlink to it in the parent directory of the qwc-services repositories:
+
+    ln -s qwc-services-core/scripts/justfile ..
+
 To use a local version of QWC Services Core for development, replace the
 `qwc-services-core` module URL in `requirements.txt` of each service with an URL
 pointing to the local files:

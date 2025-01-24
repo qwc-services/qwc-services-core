@@ -1,0 +1,116 @@
+_default:
+    just --list
+
+# Clone qwc-services repositories
+clone-qwc-services:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    GITBASE=https://github.com/qwc-services
+    #GITBASE=git@github.com:qwc-services
+    REPOS="qwc-config-service
+        qwc-docker
+        qwc-ogc-service
+        qwc-services-core
+        qwc-map-viewer
+        qwc-config-db
+        qwc-legend-service
+        qwc-admin-gui
+        qwc-db-auth
+        qwc-data-service
+        qwc-permalink-service
+        qwc-print-service
+        qwc-elevation-service
+        qwc-fulltext-search-service
+        qwc-ldap-auth
+        qwc-registration-gui"
+
+    for repo in $REPOS; do
+        if [ ! -d "${repo}" ]; then
+            git clone $GITBASE/$repo.git
+        fi
+    done
+
+# Execute git command in all subdirectories
+gitall *cmd:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    YELLOW='\033[0;33m'
+    NC='\033[0m' # No Color
+    for repo in $(find . -maxdepth 2 -name .git -type d); do
+        repodir=$(dirname $repo)
+        pushd $repodir > /dev/null
+        printf "\ncd ${YELLOW}${repodir}${NC} && git {{cmd}}\n"
+        git {{cmd}}
+        popd > /dev/null
+    done
+
+
+# Migrate Python project to uv
+[no-cd]
+migrate flask_cors="true" system-packages="false": pyproject
+    rm -rf .venv
+    test {{system-packages}} = false || uv venv --system-site-packages
+    uv sync
+    test {{flask_cors}} = false || uv add --dev flask_cors
+    uv add --dev python-dotenv
+    echo .venv >> .dockerignore
+    uv export --format requirements-txt --no-dev > requirements.txt
+    git add pyproject.toml uv.lock requirements.txt .dockerignore
+    git commit -m  "Migrate to uv"
+
+# Generate pyproject.toml
+[no-cd]
+pyproject:
+    #!/usr/bin/env python3
+    import subprocess
+    import re
+
+    dirname = subprocess.run('basename $(pwd)', shell=True, capture_output=True, text=True)
+    tag = subprocess.run('git describe --tags --abbrev=0', shell=True, capture_output=True, text=True)
+    readme = open('README.md', 'r', encoding='utf-8').read()
+    title = re.search(r'^(.*)\n=+', readme, re.MULTILINE).group(1)
+
+    head = f"""[project]
+    name = "{dirname.stdout.strip()}"
+    version = "{tag.stdout.strip()}"
+    description = "{title}"
+    readme = "README.md"
+    requires-python = ">=3.10"
+    dependencies = [
+    """
+    with open('pyproject.toml', 'w') as file:
+        file.write(head)
+        with open('requirements.txt', 'r') as lines:
+            reqs = ',\n'.join(f'    "{line.strip().replace("==", "~=")}"' for line in lines)
+            file.write(reqs)
+        file.write('\n]\n')
+
+# Upgrade all packages
+[no-cd]
+upgrade-all:
+    uv lock --upgrade
+    uv export --format requirements-txt --no-dev > requirements.txt
+
+default_tag := datetime('v%Y.%m.%d')
+
+# Bump release
+[no-cd]
+release tag=default_tag:
+    sed -i 's/^version = .*/version = "{{tag}}"/' --in-place pyproject.toml
+    uv lock
+    uv export --format requirements-txt --no-dev > requirements.txt
+    git add pyproject.toml uv.lock requirements.txt
+    git commit -m "Release {{tag}}"
+    git tag -m {{tag}} {{tag}}
+
+
+# Publish package to test.pypi.org
+[no-cd]
+publish-test:
+	@# https://packaging.python.org/guides/using-testpypi
+	uv publish --index https://test.pypi.org/simple/
+	# Test with `python -m pip install --index-url https://test.pypi.org/simple/ qwc-services-core`
+
+# Install uv with shell installer
+install-uv:
+    curl -LsSf https://astral.sh/uv/install.sh | sh
