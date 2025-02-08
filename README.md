@@ -11,6 +11,20 @@ See [QWC Docker](https://github.com/qwc-services/qwc-docker/) for using QWC Serv
 This repository contains the shared modules for QWC services.
 
 
+Environment variables
+=====================
+
+| Name                         | Default                     | Description                                                                         |
+|------------------------------|-----------------------------|-------------------------------------------------------------------------------------|
+| `JWT_SECRET_KEY`             | `<random>`                  | Secret key used to encode and decode JWTs.                                          |
+| `JWT_COOKIE_CSRF_PROTECT`    | `True`                      | Controls whether CSRF is enabled in JWT cookies.                                    |
+| `JWT_ACCESS_COOKIE_NAME`     | `access_token_cookie`       | Name of the JWT access cookie.                                                      |
+| `QWC_SERVICE_PREFIX`         | ``                          | URL path prefix for all QWC services for single-tenant setups.                      |
+| `OVERRIDE_ACCESS_COOKIE_PATH`| `<service_prefix>`          | Path for which the access cookie is valid.                                          |
+| `TENANT_HEADER`              | `<empty>`                   | The name of the HTTP header which contains the tenant name for multi-tenant setups. |
+| `TENANT_PATH_PREFIX`         | `@service_prefix@/@tenant@` | URL path prefix for all QWC services for multi-tenant setups.                       |
+| `TENANT_ACCESS_COOKIE_PATH`  | `<tenant_path_prefix>`      | Path for which the access cookie is valid for multi-tenant setups.                  |
+
 Development
 ===========
 
