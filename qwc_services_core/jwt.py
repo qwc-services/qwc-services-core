@@ -1,12 +1,8 @@
 import os
-import datetime
 import json
 from flask_jwt_extended import JWTManager, unset_jwt_cookies
 from flask import redirect, request
 from jwt.exceptions import PyJWTError
-
-
-AUTH_PATH = os.environ.get('AUTH_PATH', '/auth')
 
 
 def jwt_manager(app, api=None):
@@ -17,7 +13,7 @@ def jwt_manager(app, api=None):
     app.config['JWT_ACCESS_COOKIE_NAME'] = os.environ.get(
         'JWT_ACCESS_COOKIE_NAME', 'access_token_cookie')
     app.config['JWT_COOKIE_CSRF_PROTECT'] = str(os.environ.get(
-        'JWT_COOKIE_CSRF_PROTECT', 'False')).upper() == "TRUE"
+        'JWT_COOKIE_CSRF_PROTECT', 'True')).upper() == "TRUE"
     app.config['JWT_CSRF_CHECK_FORM'] = True
     app.config['JWT_SECRET_KEY'] = os.environ.get(
         'JWT_SECRET_KEY', os.urandom(24))
@@ -27,13 +23,11 @@ def jwt_manager(app, api=None):
 
     jwt = JWTManager(app)
 
-
-    def auth_path_prefix():
-        return app.session_interface.tenant_path_prefix().rstrip("/") + "/" + AUTH_PATH.lstrip("/")
-
-    def handle_bad_jwt():
-        redirect_url = auth_path_prefix() + '/login?url=%s' % request.args.get('url', request.url)
+    def handle_bad_jwt(reason):
+        redirect_url = request.url
+        app.logger.warn("Redirecting to %s and unsetting JWT cookie" % redirect_url)
         resp = redirect(redirect_url)
+        traceback.print_exc()
         unset_jwt_cookies(resp)
         return resp
 
