@@ -27,7 +27,6 @@ def jwt_manager(app, api=None):
         redirect_url = request.url
         app.logger.warn("Redirecting to %s and unsetting JWT cookie" % redirect_url)
         resp = redirect(redirect_url)
-        traceback.print_exc()
         unset_jwt_cookies(resp)
         return resp
 
