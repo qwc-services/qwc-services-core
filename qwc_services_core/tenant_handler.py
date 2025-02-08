@@ -195,10 +195,10 @@ class TenantPrefixMiddleware:
 class TenantSessionInterface(SecureCookieSessionInterface, TenantHandlerBase):
     """Flask session handler injecting tenant in JWT cookie path"""
 
-    def __init__(self, environ):
+    def __init__(self):
         SecureCookieSessionInterface.__init__(self)
         TenantHandlerBase.__init__(self)
-        self.service_prefix = environ.get(
+        self.service_prefix = os.environ.get(
             'QWC_SERVICE_PREFIX', '').rstrip('/')
 
     def tenant_path_prefix(self):
