@@ -23,7 +23,7 @@ def jwt_manager(app, api=None):
 
     jwt = JWTManager(app)
 
-    def handle_bad_jwt(reason):
+    def handle_bad_jwt():
         redirect_url = request.url
         app.logger.warn("Redirecting to %s and unsetting JWT cookie" % redirect_url)
         resp = redirect(redirect_url)
