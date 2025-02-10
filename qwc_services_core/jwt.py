@@ -28,6 +28,12 @@ def jwt_manager(app, api=None):
         app.logger.warn("Redirecting to %s and unsetting JWT cookie" % redirect_url)
         resp = redirect(redirect_url)
         unset_jwt_cookies(resp)
+        # Also unset cookie without trailing slash
+        # Fixes possible endless redirect loops if for whatever reason both access cookies for Paths with and without trailing / were set
+        access_cookie_path = app.config['JWT_ACCESS_COOKIE_PATH']
+        if access_cookie_path.endswith("/") and access_cookie_path != "/":
+            app.config['JWT_ACCESS_COOKIE_PATH'] = app.config['JWT_ACCESS_COOKIE_PATH'].rstrip("/")
+            unset_jwt_cookies(resp)
         return resp
 
     @app.after_request
