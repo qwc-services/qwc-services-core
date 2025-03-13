@@ -1,7 +1,7 @@
 import os
 
 from sqlalchemy import create_engine
-
+from sqlalchemy.pool import QueuePool
 
 class DatabaseEngine():
     """Helper for database connections using SQLAlchemy engines"""
@@ -10,17 +10,23 @@ class DatabaseEngine():
         """Constructor"""
         self.engines = {}
 
-    def db_engine(self, conn_str):
+    def db_engine(self, conn_str, pool_size=10, max_overflow=20, pool_timeout=30, pool_recycle=300):
         """Return engine.
 
         :param str conn_str: DB connection string for SQLAlchemy engine
 
-        see http://docs.sqlalchemy.org/en/latest/core/engines.html#postgresql
+        see https://docs.sqlalchemy.org/en/latest/core/engines.html#postgresql
         """
         engine = self.engines.get(conn_str)
         if not engine:
             engine = create_engine(
-                conn_str, pool_pre_ping=True, echo=False)
+                conn_str, 
+                poolclass=QueuePool,
+                pool_size=pool_size,
+                max_overflow=max_overflow, 
+                pool_timeout=pool_timeout,
+                pool_recycle=pool_recycle,
+                pool_pre_ping=True, echo=False)
             self.engines[conn_str] = engine
         return engine
 
