@@ -10,7 +10,7 @@ class DatabaseEngine():
         """Constructor"""
         self.engines = {}
 
-    def db_engine(self, conn_str, pool_size=5, max_overflow=10, pool_timeout=30, pool_recycle=-1):
+    def db_engine(self, conn_str):
         """Return engine.
 
         :param str conn_str: DB connection string for SQLAlchemy engine
@@ -22,10 +22,10 @@ class DatabaseEngine():
         see https://docs.sqlalchemy.org/en/latest/core/engines.html#postgresql
         """
 
-        db_pool_size = self.db_engine_env('POOL_SIZE', pool_size)
-        db_max_overflow = self.db_engine_env('MAX_OVERFLOW', max_overflow)
-        db_pool_timeout = self.db_engine_env('POOL_TIMEOUT', pool_timeout)
-        db_pool_recycle = self.db_engine_env('POOL_RECYCLE', pool_recycle)
+        db_pool_size = os.environ.get('POOL_SIZE', 5)
+        db_max_overflow = os.environ.get('MAX_OVERFLOW', 10)
+        db_pool_timeout = os.environ.get('POOL_TIMEOUT', 30)
+        db_pool_recycle = os.environ.get('POOL_RECYCLE', -1)
 
         engine = self.engines.get(conn_str)
         if not engine:
@@ -46,11 +46,11 @@ class DatabaseEngine():
         :param str env_name: Environment variable
         :param str default: Default value if environment variable is not set
         """
-        env_value = os.environ.get(env_name, default)
-        if env_value is None:
+        conn_str = os.environ.get(env_name, default)
+        if conn_str is None:
             raise Exception(
                 'db_engine_env: Environment variable %s not set' % env_name)
-        return self.db_engine(env_value)
+        return self.db_engine(conn_str)
 
     def geo_db(self):
         """Return engine for default GeoDB."""
