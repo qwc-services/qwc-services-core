@@ -13,6 +13,8 @@ class DatabaseEngine():
     def db_engine(self, conn_str):
         """Return engine.
 
+        :param str conn_str: DB connection string for SQLAlchemy engine
+
         see https://docs.sqlalchemy.org/en/latest/core/engines.html#postgresql
         """
 
