@@ -13,12 +13,6 @@ class DatabaseEngine():
     def db_engine(self, conn_str):
         """Return engine.
 
-        :param str conn_str: DB connection string for SQLAlchemy engine
-        :param int pool_size: Maximum number of possible connections
-        :param int max_overflow: Additional connections beyond pool_size during peak load
-        :param int pool_timeout: Time (in seconds) to wait for a connection to become available
-        :param int pool_recycle: Time (in seconds) after idle connections will be resetted
-
         see https://docs.sqlalchemy.org/en/latest/core/engines.html#postgresql
         """
 
