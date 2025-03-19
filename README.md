@@ -24,6 +24,10 @@ Environment variables
 | `TENANT_HEADER`              | `<empty>`                   | The name of the HTTP header which contains the tenant name for multi-tenant setups. |
 | `TENANT_PATH_PREFIX`         | `@service_prefix@/@tenant@` | URL path prefix for all QWC services for multi-tenant setups.                       |
 | `TENANT_ACCESS_COOKIE_PATH`  | `<tenant_path_prefix>`      | Path for which the access cookie is valid for multi-tenant setups.                  |
+| `POOL_SIZE`                  | `5`                         | Maximum number of possible data base connections.                                   |
+| `MAX_OVERFLOW`               | `10`                        | Additional connections beyond pool_size during peak load.                           |
+| `POOL_TIMEOUT`               | `30`                        | Time (in seconds) to wait for a connection to become available.                     |
+| `POOL_RECYCLE`               | `-1`                        | Time (in seconds) after idle connections will be resetted.                          |
 
 Development
 ===========
