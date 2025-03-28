@@ -8,7 +8,7 @@ from .permissions_reader import PermissionsReader
 from .runtime_config import RuntimeConfig
 
 
-DEFAULT_TENANT = 'default'
+DEFAULT_TENANT = os.environ.get('DEFAULT_TENANT', 'default')
 
 
 class TenantHandlerBase:
