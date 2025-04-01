@@ -18,6 +18,7 @@ class DatabaseEngine():
         see https://docs.sqlalchemy.org/en/latest/core/engines.html#postgresql
         """
 
+        db_enable_pooling = os.environ.get('ENABLE_POOLING', False)
         db_pool_size = int(os.environ.get('POOL_SIZE', 5))
         db_max_overflow = int(os.environ.get('MAX_OVERFLOW', 10))
         db_pool_timeout = int(os.environ.get('POOL_TIMEOUT', 30))
@@ -25,14 +26,18 @@ class DatabaseEngine():
 
         engine = self.engines.get(conn_str)
         if not engine:
-            engine = create_engine(
-                conn_str, 
-                poolclass=QueuePool,
-                pool_size=db_pool_size,
-                max_overflow=db_max_overflow, 
-                pool_timeout=db_pool_timeout,
-                pool_recycle=db_pool_recycle,
-                pool_pre_ping=True, echo=False)
+            if db_enable_pooling:
+                engine = create_engine(
+                    conn_str, 
+                    poolclass=QueuePool,
+                    pool_size=db_pool_size,
+                    max_overflow=db_max_overflow, 
+                    pool_timeout=db_pool_timeout,
+                    pool_recycle=db_pool_recycle,
+                    pool_pre_ping=True, echo=False)
+            else:
+                engine = create_engine(
+                    conn_str, pool_pre_ping=True, echo=False)
             self.engines[conn_str] = engine
         return engine
 
