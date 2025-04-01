@@ -18,10 +18,10 @@ class DatabaseEngine():
         see https://docs.sqlalchemy.org/en/latest/core/engines.html#postgresql
         """
 
-        db_pool_size = os.environ.get('POOL_SIZE', 5)
-        db_max_overflow = os.environ.get('MAX_OVERFLOW', 10)
-        db_pool_timeout = os.environ.get('POOL_TIMEOUT', 30)
-        db_pool_recycle = os.environ.get('POOL_RECYCLE', -1)
+        db_pool_size = int(os.environ.get('POOL_SIZE', 5))
+        db_max_overflow = int(os.environ.get('MAX_OVERFLOW', 10))
+        db_pool_timeout = int(os.environ.get('POOL_TIMEOUT', 30))
+        db_pool_recycle = int(os.environ.get('POOL_RECYCLE', -1))
 
         engine = self.engines.get(conn_str)
         if not engine:
