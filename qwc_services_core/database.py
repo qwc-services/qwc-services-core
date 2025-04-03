@@ -18,7 +18,7 @@ class DatabaseEngine():
         see https://docs.sqlalchemy.org/en/latest/core/engines.html#postgresql
         """
 
-        db_enable_pooling = os.environ.get('ENABLE_POOLING', False)
+        db_enable_pooling = os.environ.get('ENABLE_POOLING', 'False').lower() in ('t', 'true')
         db_pool_size = int(os.environ.get('POOL_SIZE', 5))
         db_max_overflow = int(os.environ.get('MAX_OVERFLOW', 10))
         db_pool_timeout = int(os.environ.get('POOL_TIMEOUT', 30))
