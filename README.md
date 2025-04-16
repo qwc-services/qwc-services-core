@@ -29,6 +29,7 @@ Environment variables
 | `MAX_OVERFLOW`               | `10`                        | Additional connections beyond pool_size during peak load.                           |
 | `POOL_TIMEOUT`               | `30`                        | Time (in seconds) to wait for a connection to become available.                     |
 | `POOL_RECYCLE`               | `-1`                        | Time (in seconds) after idle connections will be resetted.                          |
+| `CONFIG_PATH`                | `/srv/qwc_service/config`   | The path under where QWC Services' configuration files reside.                      |
 
 Development
 ===========
