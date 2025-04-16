@@ -21,6 +21,7 @@ Environment variables
 | `JWT_ACCESS_COOKIE_NAME`     | `access_token_cookie`       | Name of the JWT access cookie.                                                      |
 | `QWC_SERVICE_PREFIX`         | ``                          | URL path prefix for all QWC services for single-tenant setups.                      |
 | `OVERRIDE_ACCESS_COOKIE_PATH`| `<service_prefix>`          | Path for which the access cookie is valid.                                          |
+| `QWC_TENANT`                 | ``                          | Tenant name. Overrides the tenant name extracted from `TENANT_HEADER`.              |
 | `TENANT_HEADER`              | `<empty>`                   | The name of the HTTP header which contains the tenant name for multi-tenant setups. |
 | `TENANT_PATH_PREFIX`         | `@service_prefix@/@tenant@` | URL path prefix for all QWC services for multi-tenant setups.                       |
 | `TENANT_ACCESS_COOKIE_PATH`  | `<tenant_path_prefix>`      | Path for which the access cookie is valid for multi-tenant setups.                  |
