@@ -186,7 +186,9 @@ class TenantPrefixMiddleware:
                 'TENANT_PATH_PREFIX', '@service_prefix@/@tenant@'
             ).replace(
                 '@service_prefix@', self.service_prefix
-            ).replace('@tenant@', tenant)
+            ).replace(
+                '@tenant@', tenant
+            ).rstrip('/')
             environ['SCRIPT_NAME'] = prefix + environ.get(
                 'SCRIPT_NAME', '')
         return self.app(environ, start_response)
