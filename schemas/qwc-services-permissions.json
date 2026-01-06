@@ -11,6 +11,10 @@
       "format": "uri",
       "default": "https://github.com/qwc-services/qwc-services-core/raw/master/schemas/qwc-services-permissions.json"
     },
+    "permissions_default_allow": {
+      "title": "Whether permissions where generated with permissions_default_allow",
+      "type": "boolean"
+    },
     "users": {
       "title": "Users",
       "type": "array",

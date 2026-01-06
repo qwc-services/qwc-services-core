@@ -122,7 +122,8 @@ class PermissionsReader():
             'users': users,
             'user_groups': user_groups,
             'groups': groups,
-            'roles': roles
+            'roles': roles,
+            'permissions_default_allow': permissions.get('permissions_default_allow', False)
         }
 
     def expand_unified_permissions(self, role_permissions, resources_lookup,
@@ -333,3 +334,6 @@ class PermissionsReader():
                 permissions.extend(resource_permissions)
 
         return permissions
+
+    def permissions_default_allow(self):
+        return self.permissions['permissions_default_allow']
