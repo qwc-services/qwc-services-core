@@ -335,5 +335,52 @@ class PermissionsReader():
 
         return permissions
 
+    def resource_restrictions(self, resource_key, identity, subresource_filter=[]):
+        """ Return list of resources which are restricted for identity roles.
+
+        :param str resource_key: Resource key in permissions data
+        :param obj identity: User identity
+        :param list subresource_filter: List of (resource_name, resource_key) tuples for subresource selection
+
+        Note: is function is only relevant if permissions_default_allow = true
+
+        Examples:
+            resource_restrictions('viewer_assets')
+            resource_restrictions('wms_services', [('<service_name>', 'layers'), ('<layer_name>', 'attributes')])
+        """
+
+        # Return resources which are restricted for public and not permitted for role
+
+        identity_permissions = []
+        roles = self.identity_roles(identity)
+        for role in roles:
+            role_permissions = self.permissions['roles'].get(role, {}).get(resource_key, [])
+            for filter_entry in subresource_filter:
+                role_permissions = next(filter(
+                    lambda entry: entry.get('name') == filter_entry[0], role_permissions
+                ), {}).get(filter_entry[1], [])
+            identity_permissions.extend(role_permissions)
+
+        if '*' in identity_permissions:
+            # NOTE: No restrictions if wildcard in identity_permissions
+            return []
+
+        role_restrictions = []
+        for role in self.permissions['roles']:
+            if role == 'public':
+                continue
+
+            role_permissions = self.permissions['roles'][role].get(resource_key, [])
+            for filter_entry in subresource_filter:
+                role_permissions = next(filter(
+                    lambda entry: entry.get('name') == filter_entry[0], role_permissions
+                ), {}).get(filter_entry[1], [])
+
+            for entry in role_permissions:
+                if entry not in identity_permissions:
+                    role_restrictions.append(entry)
+
+        return role_restrictions
+
     def permissions_default_allow(self):
         return self.permissions['permissions_default_allow']
