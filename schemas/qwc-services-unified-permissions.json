@@ -169,6 +169,12 @@
           "type": "array",
           "items": {
             "type": "string"
+          },
+          "info_template": {
+            "type": "boolean"
+          },
+          "queryable": {
+            "type": "boolean"
           }
         }
       },

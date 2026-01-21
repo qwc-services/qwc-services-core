@@ -143,6 +143,9 @@
                 },
                 "info_template": {
                   "type": "boolean"
+                },
+                "queryable": {
+                  "type": "boolean"
                 }
               },
               "required": [
