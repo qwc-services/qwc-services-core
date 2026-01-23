@@ -185,8 +185,9 @@ class PermissionsReader():
                 wms_layers.append({
                     'name': resource['name'],
                     'attributes': ogc_attributes,
+                    'queryable': resource.get('queryable', False),
                     # NOTE: any info templates are always permitted
-                    'info_template': True
+                    'info_template': resource.get('info_template', True)
                 })
 
                 # add potential WFS layer
