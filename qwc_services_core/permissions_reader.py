@@ -185,7 +185,8 @@ class PermissionsReader():
                 wms_layers.append({
                     'name': resource['name'],
                     'attributes': ogc_attributes,
-                    'queryable': resource.get('queryable', False),
+                    # NOTE: dataproducts in unified permissions are queryable by default
+                    'queryable': resource.get('queryable', True),
                     # NOTE: any info templates are always permitted
                     'info_template': resource.get('info_template', True)
                 })
