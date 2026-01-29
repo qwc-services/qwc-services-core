@@ -9,7 +9,7 @@ Shared modules for QWC services.
 
 setuptools.setup(
     name="qwc-services-core",
-    version="1.5.1",
+    version="1.5.2",
     author="Sourcepole AG",
     author_email="info@sourcepole.ch",
     description="Shared modules for QWC services",
