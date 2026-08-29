@@ -19,10 +19,11 @@ class RuntimeConfig:
         filename = '%sConfig.json' % service
         return safe_join(config_path, tenant, filename)
 
-    def __init__(self, service, logger):
+    def __init__(self, service, logger, config_file_is_optional = true):
         self.service = service
         self.logger = logger
         self.config = None
+        self.config_file_is_optional = config_file_is_optional
 
     def set_config(self, config):
         """ Directly sets the internal config object. """
@@ -47,10 +48,16 @@ class RuntimeConfig:
                 dataout = ENVVAR_PATTERN.sub(envrepl, data)
                 self.config = json.loads(dataout)
         except Exception as e:
-            self.logger.error(
-                "Could not load runtime config '%s':\n%s" %
-                (runtime_config_path, e)
-            )
+            if self.config_file_is_optional:
+                self.logger.info(
+                    "Could not load runtime config '%s':\n%s\nHowever ignoring due to option config_file_is_optional being set to true" %
+                    (runtime_config_path, e)
+                )
+            else:
+                self.logger.error(
+                    "Could not load runtime config '%s':\n%s" %
+                    (runtime_config_path, e)
+                )
             self.config = {}
         return self
 
