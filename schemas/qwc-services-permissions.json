@@ -246,6 +246,9 @@
           },
           "deletable": {
             "type": "boolean"
+          },
+          "geomreadonly": {
+            "type": "boolean"
           }
         },
         "required": [
